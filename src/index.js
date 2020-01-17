@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded",() => {
 
   window.App || (window.App = {})
 
-  App.cable = _.createConsumer("ws://javascript-project-gyro-back.herokuapp.com/cable")
+  App.cable = _.createConsumer("wss://javascript-project-gyro-back.herokuapp.com/cable")
   App.message = App.cable.subscriptions.create("GameChannel", {
     received: function(data){
       alert.innerText = data["body"]["coor"]
