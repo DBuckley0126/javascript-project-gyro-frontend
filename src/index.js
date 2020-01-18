@@ -116,10 +116,10 @@ document.addEventListener("DOMContentLoaded",() => {
       // It center the positioning point to the center of the ball
       // ball.style.top  = (maxY*y/180 - 10) + "px";
       // ball.style.left = (maxX*x/180 - 10) + "px";
-      App.game.sendMessage({x: x})
+      // App.game.sendMessage({x: x})
     })
 
-    // let loop = window.setInterval(()=>{App.game.sendMessage({x: x})}, 100)
+    let loop = window.setInterval(()=>{App.game.sendMessage({x: x})}, 100)
   })
 
 })
