@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded",() => {
       }
     })
 
-    let y = 0
+    let x = 0
     window.addEventListener('deviceorientation', event => {
       console.log(event.alpha + ' : ' + event.beta + ' : ' + event.gamma);
       // x = event.beta;  // In degree in the range [-180,180]
