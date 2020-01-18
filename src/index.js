@@ -1,6 +1,17 @@
+import AppManager from './app/components/app_manager'
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const container = document.querySelector('#app-container')
+  const app = new AppManager(container)
+
+})
+
+
+
 import _ from 'actioncable';
 
-const ENV = "production"
+const ENV = "development"
 
 document.addEventListener("DOMContentLoaded",() => {
 
@@ -99,24 +110,19 @@ document.addEventListener("DOMContentLoaded",() => {
 
     let x = 0
     window.addEventListener('deviceorientation', event => {
-      // x = event.beta;  // In degree in the range [-180,180]
-      x = event.gamma; // In degree in the range [-90,90]
+      tempX = event.gamma; // In degree in the range [-90,90]
 
       // Because we don't want to have the device upside down
       // We constrain the x value to the range [-90,90]
-       if (x >  90) { x =  90};
-       if (x < -90) { x = -90};
+       if (tempX >  90) { tempX =  90};
+       if (tempX < -90) { tempX = -90};
 
       // To make computation easier we shift the range of
-      // x and y to [0,180]
-      // x += 90;
-      x += 90;
+      tempX += 90;
 
-      // 10 is half the size of the ball
-      // It center the positioning point to the center of the ball
-      // ball.style.top  = (maxY*y/180 - 10) + "px";
-      // ball.style.left = (maxX*x/180 - 10) + "px";
-      // App.game.sendMessage({x: x})
+      // Round value to nearest whole number
+      x = Math.round(tempX)
+
     })
 
     let loop = window.setInterval(()=>{App.game.sendMessage({x: x})}, 100)

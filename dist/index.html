@@ -6,30 +6,36 @@
     <link rel="stylesheet" href="./scss/styles.css">
   </head>
   <body>
-    <script src="main.js"></script>
+    
+    <main id="app-container" class="container">
+      
 
-    <header>
-      <h2>Gyro</h2>
-    </header>
-
-    <main>
-      <div id="desktop-div">
+      <div id="desktop-container" class="container">
         <button id="create-button">create game</button>
         <div id="join-code">
 
         </div>
+        <div class="alert">
+        
+        </div>
+        <div class="coordinates-display">
+            
+        </div>
       </div>
-      <div id="mobile-div">
+
+      <div id="mobile-container" class="container">
         <input type="text" id="code-input">
         <button id="join-button">join game</button>
-      </div>
-      <div id="alert">
+        <div class="alert">
         
+        </div>
+        <div class="coordinates-display">
+          
+        </div>
       </div>
-      <div id="coordinates-display">
-        
-      </div>
+
     </main>
 
+    <script src="main.js"></script>
   </body>
 </html>
