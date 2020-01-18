@@ -40,8 +40,11 @@ document.addEventListener("DOMContentLoaded",() => {
 
     App.game = App.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: false}, {
       received: function(data){
+
         switch(data["type"]){
           case "broadcast":
+            console.log(data["body"])
+            coordinatesDisplay.innerText = data["body"]["y"].toString()
             break
           case "alert":
             alert.innerText = data["body"]["message"] 
@@ -53,18 +56,23 @@ document.addEventListener("DOMContentLoaded",() => {
         this.perform('data_relay', {body: messageBody})
       },
       rejected: function(data){
-        console.log("subscription rejected")
+        alert.innerText = `subscription rejected to game ${joinCode}`
       }
     })
 
-    window.addEventListener("mousemove", event => {
-      var x = event.clientX;     // Get the horizontal coordinate
-      var y = event.clientY;     // Get the vertical coordinate
-      var coor = "X coords: " + x + ", Y coords: " + y;
+    // window.addEventListener("mousemove", event => {
+    //   var x = event.clientX;     // Get the horizontal coordinate
+    //   var y = event.clientY;     // Get the vertical coordinate
+    //   var coor = "X coords: " + x + ", Y coords: " + y;
   
-      App.game.sendMessage({button_pressed: true, coor: coor})
-    })
+    //   App.game.sendMessage({coor: coor})
+    // })
+
+    // let loop = window.setInterval(()=>{App.game.sendMessage({coor: Math.floor(10000 + (90000 - 10000) * Math.random())})}, 500)
+    // loop
 })
+
+
 
   joinButton.addEventListener("click", event => {
     let joinCode = codeInput.value
@@ -73,8 +81,9 @@ document.addEventListener("DOMContentLoaded",() => {
       received: function(data){
         switch(data["type"]){
           case "broadcast":
-            console.log(data["body"]["coor"])
-            coordinatesDisplay.innerText = data["body"]["coor"]
+            // console.log(data["body"]["coor"])
+            // coordinatesDisplay.innerText = data["body"]["coor"]
+            break
           case "alert":
             alert.innerText = data["body"]["message"] 
             break  
@@ -88,6 +97,29 @@ document.addEventListener("DOMContentLoaded",() => {
       }
     })
 
+    let y = 0
+    window.addEventListener('deviceorientation', event => {
+      console.log(event.alpha + ' : ' + event.beta + ' : ' + event.gamma);
+      // x = event.beta;  // In degree in the range [-180,180]
+      y = event.gamma; // In degree in the range [-90,90]
+
+      // Because we don't want to have the device upside down
+      // We constrain the x value to the range [-90,90]
+      // if (x >  90) { x =  90};
+      // if (x < -90) { x = -90};
+
+      // To make computation easier we shift the range of
+      // x and y to [0,180]
+      // x += 90;
+      y += 90;
+
+      // 10 is half the size of the ball
+      // It center the positioning point to the center of the ball
+      // ball.style.top  = (maxY*y/180 - 10) + "px";
+      // ball.style.left = (maxX*x/180 - 10) + "px";
+    })
+
+    let loop = window.setInterval(()=>{App.game.sendMessage({y: y})}, 100)
   })
 
 })
