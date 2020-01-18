@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded",() => {
         switch(data["type"]){
           case "broadcast":
             console.log(data["body"])
-            coordinatesDisplay.innerText = data["body"]["y"].toString()
+            coordinatesDisplay.innerText = data["body"]["x"].toString()
             break
           case "alert":
             alert.innerText = data["body"]["message"] 
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded",() => {
     window.addEventListener('deviceorientation', event => {
       console.log(event.alpha + ' : ' + event.beta + ' : ' + event.gamma);
       // x = event.beta;  // In degree in the range [-180,180]
-      y = event.gamma; // In degree in the range [-90,90]
+      x = event.beta; // In degree in the range [-90,90]
 
       // Because we don't want to have the device upside down
       // We constrain the x value to the range [-90,90]
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded",() => {
       // To make computation easier we shift the range of
       // x and y to [0,180]
       // x += 90;
-      y += 90;
+      x += 90;
 
       // 10 is half the size of the ball
       // It center the positioning point to the center of the ball
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded",() => {
       // ball.style.left = (maxX*x/180 - 10) + "px";
     })
 
-    let loop = window.setInterval(()=>{App.game.sendMessage({y: y})}, 100)
+    let loop = window.setInterval(()=>{App.game.sendMessage({x: x})}, 100)
   })
 
 })
