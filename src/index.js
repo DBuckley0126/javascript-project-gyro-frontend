@@ -1,6 +1,6 @@
 import _ from 'actioncable';
 
-// const ENV = "development"
+const ENV = "production"
 
 document.addEventListener("DOMContentLoaded",() => {
 
