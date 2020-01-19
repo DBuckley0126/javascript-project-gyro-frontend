@@ -1,5 +1,5 @@
 import _ from 'actioncable';
-const ENV = "development"
+const ENV = "production"
 
 const CableAdapter = (function(){
 
