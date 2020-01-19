@@ -1,0 +1,15 @@
+#app-container #desktop-container {
+  display: none;
+}
+#app-container #desktop-container #mobile-connected-alert {
+  display: none;
+}
+#app-container #desktop-container #join-code-display {
+  display: none;
+}
+
+#app-container #mobile-container {
+  display: none;
+}
+
+/*# sourceMappingURL=app.css.map */

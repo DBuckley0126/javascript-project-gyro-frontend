@@ -1,4 +1,7 @@
-const DesktopAdapter = (function(){
+import _ from 'actioncable';
+const ENV = "development"
+
+const CableAdapter = (function(){
 
   //Singleton Holder
   let instance = null 
@@ -16,9 +19,15 @@ const DesktopAdapter = (function(){
         return instance
       }else{
         this.token = token
-        instance = this 
+        this.cable = _.createConsumer( ENV == "development" ? `ws://localhost:3000/cable` : "wss://javascript-project-gyro-back.herokuapp.com/cable")
+        instance = this
         return instance
       }
     }
+
+    
+
   }
 })()
+
+export {CableAdapter}
