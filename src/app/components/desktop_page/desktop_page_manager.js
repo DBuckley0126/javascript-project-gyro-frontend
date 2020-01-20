@@ -1,4 +1,5 @@
 import {CableAdapter} from '../../modules'
+import {DesktopGameManager} from '../../modules'
 
 class DesktopPageManager{
 
@@ -40,7 +41,7 @@ class DesktopPageManager{
 
     // Initialise listeners
     this.addGameCreateListener(this.createGameButton)
-    this.addFullscreenRequestButtonListener()
+
     
     return Promise.resolve("Finished setting bindings and listeners")
   }
@@ -51,19 +52,6 @@ class DesktopPageManager{
       let joinCode = Math.floor(10000 + (90000 - 10000) * Math.random());
       this.initGameSubscription(joinCode)
       this.joinCodeDisplay.innerText = joinCode
-    })
-  }
-
-  addFullscreenRequestButtonListener(context = this){
-    this.fullscreenReqestButton.addEventListener('click', function(event){
-      async function fullScreenLock(){
-        try{
-          await context.openFullscreen(context.container)
-        }catch(error){
-          context.failureNotice(error)
-        }
-      }
-      fullScreenLock()
     })
   }
 
@@ -90,7 +78,7 @@ class DesktopPageManager{
 
   // Create subscription from DesktopPageManager's cable using joinCode
   initGameSubscription(joinCode, context = this){
-    this._game = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: false}, {
+    this.gameCable = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: false}, {
       received: function(data){
         context.cableDataHandler(data)
       },
@@ -105,7 +93,7 @@ class DesktopPageManager{
         this.perform('sensor_data_relay', payload)
       },
       rejected: function(data){
-        let error = {statusText: `Failed to create game for join code ${joinCode}`}
+        let error = {type:"connection_rejected", statusText: `Failed to create game for join code ${joinCode}`}
         context.failureNotice(error)
       }
     })
@@ -123,6 +111,7 @@ class DesktopPageManager{
           case "game_join_success":
             console.log("mobile joined success")
             this.initMobileConnectionObserver()
+            this.DesktopGameManager = new DesktopGameManager(this)
             break
           case "game_create_success":
             console.log("game create seccess")
@@ -130,7 +119,7 @@ class DesktopPageManager{
             this.initDesktopPingLoop()
             break  
         }
-        this.alertNotice({statusText: data["body"]["message"]})
+        this.alertNotice({type:"connection_success", statusText: data["body"]["message"]})
         break
     }
   }
@@ -140,24 +129,23 @@ class DesktopPageManager{
     this.lastPingFromMobile = Date.now()
     this.mobileActive = data["body"]["user_active"]
     console.log(data["body"])
-    console.log(data["body"]["user_active"])
-    if(data["body"]["x"]){this.coordinatesDisplay.innerText = data["body"]["x"].toString()}
+    this.DesktopGameManager.sensorData = {x: data["body"]["x"]}
   }
 
   // User notices/warnings
-  failureNotice(error = {statusText: "Failure Unknown"}){
+  failureNotice(error = {type:"undefiend", statusText: "Failure Unknown"}){
     console.log(error)
     alert(error.statusText)
   }
 
-  alertNotice(notice = {statusText: "Failure Unknown"}){
+  alertNotice(notice = {type:"undefiend", statusText: "Failure Unknown"}){
     console.log(notice)
     this.alert.innerHTML = notice.statusText
   }
 
   // Broadcasters
   initDesktopPingLoop(){
-    setInterval(()=>{this._game.desktopPing({action:"desktop_connection_ping", type:"desktop_ping", body:{active: true}})}, 1000)
+    setInterval(()=>{this.gameCable.desktopPing({action:"desktop_connection_ping", type:"desktop_ping", body:{active: true}})}, 1000)
   }
 
   // Connection Observers
@@ -167,38 +155,21 @@ class DesktopPageManager{
       if(this.lastPingFromMobile < Date.now()-1500){
         this.mobileConnected = false
         this.mobileConnectedAlert.style.display = "none"
+        this.DesktopGameManager.connectionStatus = {connection: false, active: false}
       } else {
         this.mobileConnected = true
         this.mobileConnectedAlert.style.display = "block"
-      }
-      // Checks if user is focused on mobile window
-      if(!this.mobileActive && this.mobileConnected){
-        this.mobileUnactiveAlert.style.display = "block"
-      }else{
-        this.mobileUnactiveAlert.style.display = "none"
+        // Checks if user is focused on mobile window
+        if(!this.mobileActive){
+          this.mobileUnactiveAlert.style.display = "block"
+          this.DesktopGameManager.connectionStatus = {connection: true, active: false}
+        }else{
+          this.mobileUnactiveAlert.style.display = "none"
+          this.DesktopGameManager.connectionStatus = {connection: true, active: true}
+        }
       }
     }, 500)
   }
-
-    // Request fullscreen from browser
-    openFullscreen(element) {
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-        return Promise.resolve("Request fullscreen granted")
-      } else if (element.mozRequestFullScreen) { /* Firefox */
-        element.mozRequestFullScreen();
-        return Promise.resolve("Request fullscreen granted")
-      } else if (element.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-        element.webkitRequestFullscreen();
-        return Promise.resolve("Request fullscreen granted")
-      } else if (element.msRequestFullscreen) { /* IE/Edge */
-        element.msRequestFullscreen();
-        return Promise.resolve("Request fullscreen granted")
-      } else {
-        return Promise.reject("Request fullscreen denied")
-      }
-    }
-
 }
 
 export {DesktopPageManager}

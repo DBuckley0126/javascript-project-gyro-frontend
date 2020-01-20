@@ -1,4 +1,5 @@
 import {CableAdapter} from '../../modules'
+import { MobileGameManager } from '../../modules'
 
 class MobilePageManager{
 
@@ -37,11 +38,9 @@ class MobilePageManager{
     this.desktopDisconnectAlert = this.container.querySelector("#desktop-disconnected-alert")
     this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
 
-
     // Initialise listeners
     this.addJoinGameListener(this.joinGameButton)
     this.addUserFocusListeners(window)
-    this.addFullscreenRequestButtonListener()
 
     return Promise.resolve("Finished setting bindings and listeners")
   }
@@ -64,20 +63,6 @@ class MobilePageManager{
     });
   }
 
-  addFullscreenRequestButtonListener(context = this){
-    this.fullscreenReqestButton.addEventListener('click', function(event){
-      async function fullScreenLock(){
-        try{
-          await context.openFullscreen(context.container)
-          await screen.orientation.lock("portrait-primary")
-        }catch(error){
-          context.failureNotice(error)
-        }
-      }
-      fullScreenLock()
-    })
-  }
-
   addGyroscopeListener(element){
     element.addEventListener('deviceorientation', (event,context = this) => {
       let tempX = event.gamma; // In degree in the range [-90,90]
@@ -92,6 +77,8 @@ class MobilePageManager{
 
       // Round value to nearest whole number
       context.gyroscopeData = {x: Math.round(tempX), y: null, z: null}
+
+      context.MobileGameManager.sensorData = {x: context.gyroscopeData["x"]}
 
     })
   }
@@ -117,7 +104,7 @@ class MobilePageManager{
 
   // Create subscription from DesktopPageManager's cable using joinCode
   initGameSubscription(joinCode, context = this){
-    this._game = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: true}, {
+    this.gameCable = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: true}, {
       received: function(data){
         context.cableDataHandler(data)
       },
@@ -127,7 +114,7 @@ class MobilePageManager{
         this.perform('sensor_data_relay', payload)
       },
       rejected: function(data){
-        let error = {statusText: `Failed to join game with join code ${joinCode}`}
+        let error = {type:"connection_failed", statusText: `Failed to join game with join code ${joinCode}`}
         context.failureNotice(error)
       }
     })
@@ -140,12 +127,13 @@ class MobilePageManager{
         switch(data["action"]){
           case "game_join_success":
             console.log("Join game success")
+            this.MobileGameManager = new MobileGameManager(this)
             this.addGyroscopeListener(window)
             this.addGryoscopeBroadcaster(window)
             this.initDesktopConnectionObserver()
             break
         }
-        this.alertNotice({statusText: data["body"]["message"]})
+        this.alertNotice({type:"connection_success", statusText: data["body"]["message"]})
         break  
 
       case "desktop_ping":
@@ -156,19 +144,19 @@ class MobilePageManager{
   }
 
   // User notices/warnings
-  failureNotice(error = {statusText: "Failure Unknown"}){
+  failureNotice(error = {type:"undefiend",statusText: "Failure Unknown"}){
     console.log(error)
     alert(error.statusText)
   }
 
-  alertNotice(notice = {statusText: "Notice Unknown"}){
+  alertNotice(notice = {type:"undefiend",statusText: "Notice Unknown"}){
     console.log(notice)
     this.alert.innerText = notice.statusText
   }
 
   // Broadcasters
   addGryoscopeBroadcaster(element){
-    element.setInterval(()=>{this._game.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
+    element.setInterval(()=>{this.gameCable.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
   }
 
   // Connection Observers
@@ -178,30 +166,13 @@ class MobilePageManager{
       if(this.lastPingFromDesktop < Date.now()-1500){
         this.desktopConnected = false
         this.desktopDisconnectAlert.style.display = "block"
+        this.MobileGameManager.connectionStatus = {connection: false}
       } else {
         this.desktopConnected = true
         this.desktopDisconnectAlert.style.display = "none"
+        this.MobileGameManager.connectionStatus = {connection: true}
       }
     }, 1000)
-  }
-
-  // Request fullscreen from browser
-  openFullscreen(element) {
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else if (element.mozRequestFullScreen) { /* Firefox */
-      element.mozRequestFullScreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else if (element.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-      element.webkitRequestFullscreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else if (element.msRequestFullscreen) { /* IE/Edge */
-      element.msRequestFullscreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else {
-      return Promise.reject("Request fullscreen denied")
-    }
   }
 
 }
