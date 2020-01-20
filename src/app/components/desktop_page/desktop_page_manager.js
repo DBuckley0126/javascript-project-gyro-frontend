@@ -77,11 +77,11 @@ class DesktopPageManager{
   initGameSubscription(joinCode, context = this){
     this._game = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: false}, {
       received: function(data){
-        console.log("received data from cable")
         context.cableDataHandler(data)
       },
-      dataRelay: function(payload){
-        this.perform('data_relay', payload)
+      desktopPing: function(payload){
+        console.log("Desktop ping sent")
+        this.perform('desktop_ping', payload)
       },
       sendMessage: function(payload){
 
@@ -112,14 +112,11 @@ class DesktopPageManager{
           case "game_create_success":
             console.log("game create seccess")
             this.joinCodeDisplay.style.display = "block"
+            this.initDesktopPingLoop()
             break  
         }
         this.alertNotice({statusText: data["body"]["message"]})
         break
-        
-      default:
-        let error = {statusText: "Unable to handle data received from cable connection", data: data}
-        this.failureNotice(error)
     }
   }
 
@@ -143,11 +140,14 @@ class DesktopPageManager{
     this.alert.innerHTML = notice.statusText
   }
 
+  // Broadcasters
+  initDesktopPingLoop(){
+    setInterval(()=>{this._game.desktopPing({action:"desktop_connection_ping", type:"desktop_ping", body:{active: true}})}, 1000)
+  }
+
   // Connection Observers
   initMobileConnectionObserver(){
     setInterval(()=>{
-      console.log("ping check begin")
-
       // checks if mobile is connected
       if(this.lastPingFromMobile < Date.now()-1500){
         this.mobileConnected = false

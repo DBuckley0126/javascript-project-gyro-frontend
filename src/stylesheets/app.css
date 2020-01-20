@@ -14,5 +14,8 @@
 #app-container #mobile-container {
   display: none;
 }
+#app-container #mobile-container #desktop-disconnected-alert {
+  display: none;
+}
 
 /*# sourceMappingURL=app.css.map */

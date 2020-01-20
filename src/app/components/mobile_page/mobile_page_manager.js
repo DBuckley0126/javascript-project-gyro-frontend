@@ -8,6 +8,8 @@ class MobilePageManager{
     this.renderIndex()
     this.gyroscopeData = {x: null, y: null, z: null}
     this.userActive = true
+    this.lastPingFromDesktop = null
+    this.desktopConnected = false
 
   }
 
@@ -32,6 +34,7 @@ class MobilePageManager{
     this.alert = this.container.querySelector(".alert")
     this.coordinatesDisplay = this.container.querySelector(".coordinates-display")
     this.joinCodeInput = this.container.querySelector("#join-code-input")
+    this.desktopDisconnectAlert = this.container.querySelector("#desktop-disconnected-alert")
 
 
     // Initialise listeners
@@ -102,11 +105,7 @@ class MobilePageManager{
       received: function(data){
         context.cableDataHandler(data)
       },
-      dataRelay: function(payload){
-        this.perform('data_relay', payload)
-      },
       sendMessage: function(payload){
-
       },
       sensorDataRelay: function(payload){
         this.perform('sensor_data_relay', payload)
@@ -120,25 +119,23 @@ class MobilePageManager{
 
   // Data handler(switch) for data received from subscription
   cableDataHandler(data){
-    switch(data["type"]){
-      case "sensor_data_relay":
-        // console.log(data["body"]["coor"])
-        // coordinatesDisplay.innerText = data["body"]["coor"]
-        break
-        
+    switch(data["type"]){  
       case "subscribed":
         switch(data["action"]){
           case "game_join_success":
+            console.log("Join game success")
             this.addGyroscopeListener(window)
             this.addGryoscopeBroadcaster(window)
+            this.initDesktopConnectionObserver()
             break
         }
         this.alertNotice({statusText: data["body"]["message"]})
         break  
 
-      default:
-        let error = {statusText: "Unable to handle data received from cable connection", data: data}
-        this.failureNotice(error)
+      case "desktop_ping":
+        console.log("Desktop ping received")
+        this.lastPingFromDesktop = Date.now()
+        break  
     }
   }
 
@@ -156,6 +153,20 @@ class MobilePageManager{
   // Broadcasters
   addGryoscopeBroadcaster(element){
     element.setInterval(()=>{this._game.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
+  }
+
+  // Connection Observers
+  initDesktopConnectionObserver(){
+    setInterval(()=>{
+      // checks if desktop is connected
+      if(this.lastPingFromDesktop < Date.now()-1500){
+        this.desktopConnected = false
+        this.desktopDisconnectAlert.style.display = "block"
+      } else {
+        this.desktopConnected = true
+        this.desktopDisconnectAlert.style.display = "none"
+      }
+    }, 1000)
   }
 }
 
