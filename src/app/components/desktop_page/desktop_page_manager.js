@@ -36,9 +36,11 @@ class DesktopPageManager{
     this.joinCodeDisplay = this.container.querySelector("#join-code-display")
     this.mobileConnectedAlert = this.container.querySelector("#mobile-connected-alert")
     this.mobileUnactiveAlert = this.container.querySelector("#mobile-unactive-alert")
+    this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
 
     // Initialise listeners
     this.addGameCreateListener(this.createGameButton)
+    this.addFullscreenRequestButtonListener()
     
     return Promise.resolve("Finished setting bindings and listeners")
   }
@@ -49,6 +51,19 @@ class DesktopPageManager{
       let joinCode = Math.floor(10000 + (90000 - 10000) * Math.random());
       this.initGameSubscription(joinCode)
       this.joinCodeDisplay.innerText = joinCode
+    })
+  }
+
+  addFullscreenRequestButtonListener(context = this){
+    this.fullscreenReqestButton.addEventListener('click', function(event){
+      async function fullScreenLock(){
+        try{
+          await context.openFullscreen(context.container)
+        }catch(error){
+          context.failureNotice(error)
+        }
+      }
+      fullScreenLock()
     })
   }
 
@@ -164,6 +179,25 @@ class DesktopPageManager{
       }
     }, 500)
   }
+
+    // Request fullscreen from browser
+    openFullscreen(element) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+        return Promise.resolve("Request fullscreen granted")
+      } else if (element.mozRequestFullScreen) { /* Firefox */
+        element.mozRequestFullScreen();
+        return Promise.resolve("Request fullscreen granted")
+      } else if (element.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+        element.webkitRequestFullscreen();
+        return Promise.resolve("Request fullscreen granted")
+      } else if (element.msRequestFullscreen) { /* IE/Edge */
+        element.msRequestFullscreen();
+        return Promise.resolve("Request fullscreen granted")
+      } else {
+        return Promise.reject("Request fullscreen denied")
+      }
+    }
 
 }
 
