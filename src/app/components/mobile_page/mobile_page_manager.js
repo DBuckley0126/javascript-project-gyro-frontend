@@ -155,7 +155,6 @@ class MobilePageManager{
 
   // Broadcasters
   addGryoscopeBroadcaster(element){
-    debugger
     element.setInterval(()=>{this._game.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
   }
 }
