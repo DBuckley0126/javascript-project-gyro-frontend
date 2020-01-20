@@ -7,6 +7,7 @@ class MobilePageManager{
     this.initConnection()
     this.renderIndex()
     this.gyroscopeData = {x: null, y: null, z: null}
+    this.userActive = true
 
   }
 
@@ -32,8 +33,10 @@ class MobilePageManager{
     this.coordinatesDisplay = this.container.querySelector(".coordinates-display")
     this.joinCodeInput = this.container.querySelector("#join-code-input")
 
+
     // Initialise listeners
     this.addJoinGameListener(this.joinGameButton)
+    this.addUserFocusListeners(window)
 
     return Promise.resolve("Finished setting bindings and listeners")
   }
@@ -45,10 +48,20 @@ class MobilePageManager{
       this.initGameSubscription(joinCode)
     })
   }
+  addUserFocusListeners(element, context = this){
+    element.addEventListener('focus', function(){
+      console.log("focus")
+      context.userActive = true
+    });
+    element.addEventListener('blur', function(){
+      console.log("unfocus")
+      context.userActive = false
+    });
+  }
 
   addGyroscopeListener(element){
-    element.addEventListener('deviceorientation', event => {
-      tempX = event.gamma; // In degree in the range [-90,90]
+    element.addEventListener('deviceorientation', (event,context = this) => {
+      let tempX = event.gamma; // In degree in the range [-90,90]
 
       // Because we don't want to have the device upside down
       // We constrain the x value to the range [-90,90]
@@ -59,7 +72,7 @@ class MobilePageManager{
       tempX += 90;
 
       // Round value to nearest whole number
-      this.gyroscopeData = {x: Math.round(tempX), y: null, z: null}
+      context.gyroscopeData = {x: Math.round(tempX), y: null, z: null}
 
     })
   }
@@ -89,12 +102,18 @@ class MobilePageManager{
       received: function(data){
         context.cableDataHandler(data)
       },
-      sendMessage: function(messageObject){
-        this.perform('data_relay', messageObject)
+      dataRelay: function(payload){
+        this.perform('data_relay', payload)
+      },
+      sendMessage: function(payload){
+
+      },
+      sensorDataRelay: function(payload){
+        this.perform('sensor_data_relay', payload)
       },
       rejected: function(data){
         let error = {statusText: `Failed to join game with join code ${joinCode}`}
-        this.failureNotice(error)
+        context.failureNotice(error)
       }
     })
   }
@@ -102,7 +121,7 @@ class MobilePageManager{
   // Data handler(switch) for data received from subscription
   cableDataHandler(data){
     switch(data["type"]){
-      case "data_relay":
+      case "sensor_data_relay":
         // console.log(data["body"]["coor"])
         // coordinatesDisplay.innerText = data["body"]["coor"]
         break
@@ -118,7 +137,7 @@ class MobilePageManager{
         break  
 
       default:
-        error = {statusText: "Unable to handle data received from cable connection", data: data}
+        let error = {statusText: "Unable to handle data received from cable connection", data: data}
         this.failureNotice(error)
     }
   }
@@ -136,7 +155,8 @@ class MobilePageManager{
 
   // Broadcasters
   addGryoscopeBroadcaster(element){
-    element.setInterval(()=>{this._game.sendMessage({x: this.gyroscopeData.x})}, 100)
+    debugger
+    element.setInterval(()=>{this._game.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
   }
 }
 

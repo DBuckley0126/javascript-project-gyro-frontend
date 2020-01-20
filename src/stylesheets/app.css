@@ -4,6 +4,9 @@
 #app-container #desktop-container #mobile-connected-alert {
   display: none;
 }
+#app-container #desktop-container #mobile-active-alert {
+  display: none;
+}
 #app-container #desktop-container #join-code-display {
   display: none;
 }

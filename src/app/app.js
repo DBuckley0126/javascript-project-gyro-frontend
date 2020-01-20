@@ -5,7 +5,7 @@ import '../stylesheets/app.css'
 document.addEventListener('DOMContentLoaded', () => {
 
   const container = document.querySelector('#app-container')
-  const app = new AppManager(container)
+  window.AppManager = new AppManager(container)
 
 })
 

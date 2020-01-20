@@ -10,6 +10,7 @@ class DesktopPageManager{
     this.renderIndex()
     this.lastPingFromMobile = null
     this.mobileConnected = false
+    this.mobileActive = false
   }
 
   // Inital render of desktop
@@ -34,6 +35,7 @@ class DesktopPageManager{
     this.coordinatesDisplay = this.container.querySelector(".coordinates-display")
     this.joinCodeDisplay = this.container.querySelector("#join-code-display")
     this.mobileConnectedAlert = this.container.querySelector("#mobile-connected-alert")
+    this.mobileActiveAlert = this.container.querySelector("#mobile-active-alert")
 
     // Initialise listeners
     this.addGameCreateListener(this.createGameButton)
@@ -78,9 +80,14 @@ class DesktopPageManager{
         console.log("received data from cable")
         context.cableDataHandler(data)
       },
-      sendMessage: function(messageObject){
-        console.log("client sending data through cable")
-        this.perform('data_relay', messageObject)
+      dataRelay: function(payload){
+        this.perform('data_relay', payload)
+      },
+      sendMessage: function(payload){
+
+      },
+      sensorDataRelay: function(payload){
+        this.perform('sensor_data_relay', payload)
       },
       rejected: function(data){
         let error = {statusText: `Failed to create game for join code ${joinCode}`}
@@ -92,8 +99,8 @@ class DesktopPageManager{
   // Data handler(switch) for data received from subscription
   cableDataHandler(data){
     switch(data["type"]){
-      case "data_relay":
-        this.handleDataRelay(data)
+      case "sensor_data_relay":
+        this.handleSensorDataRelay(data)
         break
 
       case "subscribed":
@@ -111,16 +118,18 @@ class DesktopPageManager{
         break
         
       default:
-        error = {statusText: "Unable to handle data received from cable connection", data: data}
+        let error = {statusText: "Unable to handle data received from cable connection", data: data}
         this.failureNotice(error)
     }
   }
 
   // Handle data relay from cable
-  handleDataRelay(data){
+  handleSensorDataRelay(data){
     this.lastPingFromMobile = Date.now()
+    this.mobileActive = data["body"]["user_active"]
     console.log(data["body"])
-    if(data["body"]){this.coordinatesDisplay.innerText = data["body"]["x"].toString()}
+    console.log(data["body"]["user_active"])
+    if(data["body"]["x"]){this.coordinatesDisplay.innerText = data["body"]["x"].toString()}
   }
 
   // User notices/warnings
@@ -138,12 +147,20 @@ class DesktopPageManager{
   initMobileConnectionObserver(){
     setInterval(()=>{
       console.log("ping check begin")
-      if(this.lastPingFromMobile > Date.now()-500){
+
+      // checks if mobile is connected
+      if(this.lastPingFromMobile < Date.now()-1000){
         this.mobileConnected = false
         this.mobileConnectedAlert.style.display = "none"
       } else {
         this.mobileConnected = true
         this.mobileConnectedAlert.style.display = "block"
+      }
+      // Checks if user is focused on mobile window
+      if(this.mobileActive && !this.mobileConnected){
+        this.mobileActiveAlert.style.display = "none"
+      }else{
+        this.mobileActiveAlert.style.display = "block"
       }
     }, 500)
   }

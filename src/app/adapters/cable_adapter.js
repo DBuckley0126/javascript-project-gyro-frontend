@@ -1,5 +1,4 @@
 import _ from 'actioncable';
-const ENV = "production"
 
 const CableAdapter = (function(){
 
@@ -19,7 +18,7 @@ const CableAdapter = (function(){
         return instance
       }else{
         this.token = token
-        this.cable = _.createConsumer( ENV == "development" ? `ws://localhost:3000/cable` : "wss://javascript-project-gyro-back.herokuapp.com/cable")
+        this.cable = _.createConsumer( window.location.hostname == "localhost" ? `ws://localhost:3000/cable` : "wss://javascript-project-gyro-back.herokuapp.com/cable")
         instance = this
         return instance
       }
