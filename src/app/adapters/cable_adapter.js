@@ -18,7 +18,11 @@ const CableAdapter = (function(){
         return instance
       }else{
         this.token = token
-        this.cable = _.createConsumer( window.location.hostname == "localhost" ? `ws://localhost:3000/cable` : "wss://javascript-project-gyro-back.herokuapp.com/cable")
+        if(window.location.hostname == "localhost"){
+          this.cable = _.createConsumer(`ws://localhost:3000/cable`)
+        } else {
+          this.cable = _.createConsumer(`wss://javascript-project-gyro-back.herokuapp.com/cable`)
+        }
         instance = this
         return instance
       }
