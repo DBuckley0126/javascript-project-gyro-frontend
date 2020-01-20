@@ -4,7 +4,7 @@
 #app-container #desktop-container #mobile-connected-alert {
   display: none;
 }
-#app-container #desktop-container #mobile-active-alert {
+#app-container #desktop-container #mobile-unactive-alert {
   display: none;
 }
 #app-container #desktop-container #join-code-display {

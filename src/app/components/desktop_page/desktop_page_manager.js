@@ -35,7 +35,7 @@ class DesktopPageManager{
     this.coordinatesDisplay = this.container.querySelector(".coordinates-display")
     this.joinCodeDisplay = this.container.querySelector("#join-code-display")
     this.mobileConnectedAlert = this.container.querySelector("#mobile-connected-alert")
-    this.mobileActiveAlert = this.container.querySelector("#mobile-active-alert")
+    this.mobileUnactiveAlert = this.container.querySelector("#mobile-unactive-alert")
 
     // Initialise listeners
     this.addGameCreateListener(this.createGameButton)
@@ -149,7 +149,7 @@ class DesktopPageManager{
       console.log("ping check begin")
 
       // checks if mobile is connected
-      if(this.lastPingFromMobile < Date.now()-1000){
+      if(this.lastPingFromMobile < Date.now()-1500){
         this.mobileConnected = false
         this.mobileConnectedAlert.style.display = "none"
       } else {
@@ -157,10 +157,10 @@ class DesktopPageManager{
         this.mobileConnectedAlert.style.display = "block"
       }
       // Checks if user is focused on mobile window
-      if(this.mobileActive && !this.mobileConnected){
-        this.mobileActiveAlert.style.display = "none"
+      if(!this.mobileActive && this.mobileConnected){
+        this.mobileUnactiveAlert.style.display = "block"
       }else{
-        this.mobileActiveAlert.style.display = "block"
+        this.mobileUnactiveAlert.style.display = "none"
       }
     }, 500)
   }
