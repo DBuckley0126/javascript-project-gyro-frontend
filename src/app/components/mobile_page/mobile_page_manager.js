@@ -14,7 +14,9 @@ class MobilePageManager{
 
   }
 
-  // Inital render of desktop
+  //
+  // ─── INITAL RENDER OF DESKTOP ───────────────────────────────────────────────────
+  //
   async renderIndex(){
     try{
       await this.initBindingsAndEventListeners()
@@ -45,7 +47,9 @@ class MobilePageManager{
     return Promise.resolve("Finished setting bindings and listeners")
   }
 
-  // Listeners
+  //
+  // ─── LISTENERS ──────────────────────────────────────────────────────────────────
+  //
   addJoinGameListener(element){
     element.addEventListener("click", event => {
       let joinCode = this.joinCodeInput.value
@@ -69,8 +73,8 @@ class MobilePageManager{
 
       // Because we don't want to have the device upside down
       // We constrain the x value to the range [-90,90]
-       if (tempX >  90) { tempX =  90};
-       if (tempX < -90) { tempX = -90};
+      if (tempX >  90) { tempX =  90};
+      if (tempX < -90) { tempX = -90};
 
       // To make computation easier we shift the range of
       tempX += 90;
@@ -83,7 +87,9 @@ class MobilePageManager{
     })
   }
 
-  // Create cable connection for consumer(Unique user)
+  //
+  // ─── CREATE CABLE CONNECTION FOR CONSUMER ───────────────────────────────────────
+  //
   async initConnection(){
     try{
       await this.attachAdapter()
@@ -102,7 +108,9 @@ class MobilePageManager{
     }
   }
 
-  // Create subscription from DesktopPageManager's cable using joinCode
+  //
+  // ─── Create subscription from DesktopPageManager's cable using joinCode ───────────────────────────────────────────────────────────────────────────
+  //
   initGameSubscription(joinCode, context = this){
     this.gameCable = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: true}, {
       received: function(data){
@@ -120,7 +128,9 @@ class MobilePageManager{
     })
   }
 
-  // Data handler(switch) for data received from subscription
+  //
+  // ─── Data handler(switch) for data received from subscription ───────────────────────────────────────────────────────────────────────────
+  //
   cableDataHandler(data){
     switch(data["type"]){  
       case "subscribed":
@@ -135,7 +145,6 @@ class MobilePageManager{
         }
         this.alertNotice({type:"connection_success", statusText: data["body"]["message"]})
         break  
-
       case "desktop_ping":
         console.log("Desktop ping received")
         this.lastPingFromDesktop = Date.now()
@@ -143,7 +152,9 @@ class MobilePageManager{
     }
   }
 
-  // User notices/warnings
+  //
+  // ─── User notices/warnings ───────────────────────────────────────────────────────────────────────────
+  //
   failureNotice(error = {type:"undefiend",statusText: "Failure Unknown"}){
     console.log(error)
     alert(error.statusText)
@@ -154,12 +165,18 @@ class MobilePageManager{
     this.alert.innerText = notice.statusText
   }
 
-  // Broadcasters
+  //
+  // ─── BROADCASTERS ───────────────────────────────────────────────────────────────
+  //
+    
   addGryoscopeBroadcaster(element){
     element.setInterval(()=>{this.gameCable.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
   }
 
-  // Connection Observers
+  //
+  // ─── CONNECTION OBSERVERS ───────────────────────────────────────────────────────
+  //
+  
   initDesktopConnectionObserver(){
     setInterval(()=>{
       // checks if desktop is connected

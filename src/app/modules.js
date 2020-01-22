@@ -13,3 +13,10 @@ export {DesktopGameManager} from './components/game/desktop_game_manager'
 export {MobileGameManager} from './components/game/mobile_game_manager'
 
 export {DemoGame} from './components/demo_game/demo_game'
+
+// IMAGES
+// import '../../assets/img/cat.png'
+
+// GENERATORS
+export {BoxElement} from './components/game/generators/box_element'
+export {PlayerElement} from './components/game/generators/player_element'

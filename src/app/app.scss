@@ -3,5 +3,26 @@
 
 #app-container {
 
+ #boxA{
+   color: red;
+   width: 80px;
+   height: 80px;
+ }
+
+ #canvas{
+   border: 1px dashed black;
+   position: fixed;
+   top: 0;
+   left: 0;
+ }
+
+ #matter-canvas{
+  border: 1px dashed black;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+
 
 }

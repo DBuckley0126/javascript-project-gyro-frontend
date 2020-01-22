@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Gyro</title>
+  </head>
+  <body>
+    <main id="app-container" class="container">
+      
+      <button class="fullscreen-request-button">fullscreen</button>
+      <div id="app-alert" class="alert">
+
+      </div>
+
+      <div id="desktop-container" class="container">
+        <button id="create-game-button">create game</button>
+        <div id="join-code-display">
+
+        </div>
+        <div id="mobile-connected-alert">
+          <p>Controller is currenty connected to game</p>
+        </div>
+        <div id="mobile-unactive-alert"> 
+          <p>Controller is currently unactive</p>
+        </div>
+
+        <div class="alert">
+        
+        </div>
+        <div class="coordinates-display">
+            
+        </div>
+      </div>
+
+      <div id="mobile-container" class="container">
+        <input type="text" id="join-code-input">
+        <button id="join-game-button">join game</button>
+        <div class="alert">
+        
+        </div>
+        <div id="desktop-disconnected-alert">
+          <p>Lost connection with desktop</p>
+        </div>
+        <div class="coordinates-display">
+          
+        </div>
+      </div>
+      <div id="canvas">
+
+      </div>
+
+      <div id="matter-canvas">
+
+      </div>
+    </main>
+    
+  <script type="text/javascript" src="webpack.js"></script></body>
+</html>

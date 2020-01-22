@@ -2,9 +2,21 @@ class GameManager{
 
   constructor(PageManager){
     this.PageManager = PageManager
-    this.gameCable = PageManager.gameCable
+    // this.gameCable = PageManager.gameCable
     console.log("New GameManager instance initiated")
   }
+
+  static randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  static removeBrackets(string){
+    return string.replace(/[\])}[{(]/g, '')
+  }
+
+  //
+  // ─── EXTERNAL DATA INTERFACE ───────────────────────────────────────────────────────────────────────────
+  //
   set sensorData(obj){
     this._axisX = obj["x"]
     this._axisY = obj["y"]
@@ -23,6 +35,7 @@ class GameManager{
   get sensorData(){
     return {x: this._axisX, y: this._axisY, z: this._axisZ}
   }
+
 }
 
 export {GameManager}

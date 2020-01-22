@@ -18,4 +18,22 @@
   display: none;
 }
 
+#app-container #boxA {
+  color: red;
+  width: 80px;
+  height: 80px;
+}
+#app-container #canvas {
+  border: 1px dashed black;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+#app-container #matter-canvas {
+  border: 1px dashed black;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
 /*# sourceMappingURL=app.css.map */

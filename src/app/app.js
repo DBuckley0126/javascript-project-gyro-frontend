@@ -1,10 +1,53 @@
-import {AppManager} from './components/app_manager'
+// const container = document.querySelector('#app-container')
+// window.AppManager = new AppManager(container)
+
+import {AppManager, MobileGameManager} from './modules'
 import '../stylesheets/app.css'
+// import Matter from 'matter-js'
+
+// import catImgURL from '../../assets/img/cat.png'
+// import * as pixiTestJSON from '../../assets/img/pixi_test.json'
+// import pixiTestPNG from '../../assets/img/pixi_test.png'
+// import * as p5 from '../.././node_modules/p5/lib/p5.js'
+// import * as p5 from 'p5'
+
+
+// function randomInt(min, max) {
+//   return Math.floor(Math.random() * (max - min + 1)) + min;
+// }
+
+  // // module aliases
+  // const Engine = Matter.Engine,
+  // World = Matter.World,
+  // Bodies = Matter.Bodies;
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  const container = document.querySelector('#app-container')
-  window.AppManager = new AppManager(container)
+  window.game = new MobileGameManager
+
+  document.addEventListener('keydown', logKey);
+
+  function logKey(e) {
+  if(e.key == "ArrowRight"){
+    let currentSensor = game.sensorData
+    game.sensorData = {x: currentSensor.x + 1, y:0, z:0}
+    console.log(game.sensorData)
+  } else if(e.key === "ArrowLeft"){
+    let currentSensor = game.sensorData
+    game.sensorData = {x: currentSensor.x - 1, y:0, z:0}
+    console.log(game.sensorData)
+  }
+  }
+
+  setInterval(()=>{
+
+  }, 500)
 
 })
+
+
+
+
+
