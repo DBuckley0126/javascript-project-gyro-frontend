@@ -2,7 +2,7 @@ global.decomp = require('poly-decomp');
 
 import Matter from 'matter-js'
 import * as p5 from 'p5'
-import {GameManager, BoxElement, PlayerElement} from '../../modules'
+import {GameManager, BoxElement, PlayerElement, BulletElement} from '../../modules'
 import * as elementVerticesJSON from '../../../../assets/json/gyro_element_vertices.json'
 
 // IMAGES
@@ -19,9 +19,11 @@ class MobileGameManager extends GameManager{
     this._axisX = 0
     this._axisY = 0
     this._axisZ = 0
+    this.gunButtonPressed = false
     this.engine = null
     this.world = null
     this.boxes = []
+    this.bulletsContainer = []
     this.ground = null
     this.textureContainer = {}
     this.createGameInstance()
@@ -65,9 +67,11 @@ class MobileGameManager extends GameManager{
 
       this.engine = Engine.create()
       this.world = this.engine.world
+      this.world.gravity.y = 0
       this.ground = Bodies.rectangle(500, 900, 1000, 200, {isStatic: true})
-      this.player = new PlayerElement(500, 300, 0.5, this)
+      this.player = new PlayerElement(500, 800, 0.5, this)
       this.ground.label = "ground"
+      this.lastTimeGunFired = 0
 
       World.add(this.world, [this.ground])
       this.randomBoxDrop(2000)
@@ -94,9 +98,30 @@ class MobileGameManager extends GameManager{
       // }
       // this.sketch.endShape(this.sketch.CLOSE)
 
+      this.reactToMovementControl()
+      this.reactToGunControl()
+
       this.boxes.forEach((box) => {
         box.show()
       })
+      this.clearUp()
+    }
+  }
+
+  reactToMovementControl(){
+    const startingPoint = 500
+    const movementMultiplier = this._axisX * 10
+    const px = startingPoint + movementMultiplier
+    Body.setVelocity(this.player.matterBody, {x: px - this.player.matterBody.position.x, y: 0})
+    Body.setPosition(this.player.matterBody, {x: px, y: this.player.matterBody.position.y})
+  }
+
+  reactToGunControl(){
+    
+    if(this.gunButtonPressed && this.lastTimeGunFired < Date.now() - 500){
+      const bullet = new BulletElement(this.player.gunPosition["x"], this.player.gunPosition["y"], 1, this)
+      this.lastTimeGunFired = Date.now()
+      this.bulletsContainer.push(bullet)
     }
   }
 
@@ -107,6 +132,11 @@ class MobileGameManager extends GameManager{
       const box = new BoxElement(x, y, 100, 100, context)
       context.boxes.push(box)
     }, ms)
+  }
+
+  clearUp(){
+    for( const bullet in )
+    this.bulletsContainer.
   }
 
   produceDevCanvas(){

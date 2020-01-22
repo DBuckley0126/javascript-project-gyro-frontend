@@ -18,5 +18,7 @@ export {DemoGame} from './components/demo_game/demo_game'
 // import '../../assets/img/cat.png'
 
 // GENERATORS
+export {GeneralElement} from './components/game/generators/general_element'
 export {BoxElement} from './components/game/generators/box_element'
 export {PlayerElement} from './components/game/generators/player_element'
+export {BulletElement} from './components/game/generators/bullet_element'
