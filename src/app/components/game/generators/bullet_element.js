@@ -7,16 +7,20 @@ const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Rend
 class BulletElement extends GeneralElement {
   constructor(x, y, scale, game){
     super(scale, game)
-    this.radius = 5
+    this.radius = 10
+    this.width = 40
+    this.height = 40
     this.moveX = 0
     this.moveY = 0
 
     this.options = {
       frictionAir: 0,
-
+      label: "BulletElement"
     }
-    this.texture = this.game.textureContainer["spaceshipImg"]
+    this.texture = this.game.textureContainer["bulletImg"]
     this.produceMatter(x, y)
+    this.game.bulletElementsContainer.push(this)
+    this.container = this.game.bulletElementsContainer
   }
 
   produceMatter(x, y){
@@ -25,6 +29,7 @@ class BulletElement extends GeneralElement {
     World.add(this.game.world, this.matterBody)
     Body.setVelocity(this.matterBody, {x:0, y: - 20})
   }
+
 }
 
 export {BulletElement} 

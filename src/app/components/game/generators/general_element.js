@@ -2,7 +2,7 @@ import Matter from 'matter-js'
 import {GameManager} from '../../../modules'
 
 // module aliases
-const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body
+const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Composite = Matter.Composite
 
 class GeneralElement {
   constructor(scale, game){
@@ -18,6 +18,27 @@ class GeneralElement {
 
   scaledAxisMove(addonX = 0, addonY = 0){
     return {x:((this.moveX + addonX) * this.scale), y:((this.moveY + addonY) * this.scale)}
+  }
+
+  get index(){
+    if(this.container){
+      return this.container.indexOf(this)
+    } else {
+      console.log("ERROR: This object has no container array")
+    }
+  }
+
+  remove(){
+    if(this.container){
+      Composite.remove(this.game.world, this.matterBody)
+      const removedElementsArray = this.container.splice(this.index, 1)
+      console.log("Removed " + removedElementsArray[0].constructor.name)
+      return removedElementsArray[0]
+    } else {
+      Composite.remove(this.game.world, this.matterBody)
+      console.log("Removed from world but not from container array")
+      return this
+    }
   }
   
   show(){
