@@ -14,13 +14,13 @@ class CompleteAstroidElement extends GeneralElement {
 
     this.options = {
       frictionAir: 0,
-      label: "CompleteAstroidElement"
+      label: "completeAstroidElement"
     }
     this.verticesHash = Vertices.fromPath(GameManager.removeBrackets(this.game.elementVertices.completeAstroid.fixtures[0].hullPolygon))
     this.texture = this.game.textureContainer["completeAstroidImg"]
     this.produceMatter(x, y)
-    this.game.completeAstroidElementsContainer.push(this)
-    this.container = this.game.completeAstroidElementsContainer
+    this.game.completeAstroidElementContainer.push(this)
+    this.container = this.game.completeAstroidElementContainer
   }
 
   produceMatter(x, y){

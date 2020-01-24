@@ -24,8 +24,8 @@ class MobileGameManager extends GameManager{
     this.engine = null
     this.world = null
     this.boxes = []
-    this.bulletElementsContainer = []
-    this.completeAstroidElementsContainer = []
+    this.bulletElementContainer = []
+    this.completeAstroidElementContainer = []
     this.ground = null
     this.textureContainer = {}
     this.createGameInstance()
@@ -39,6 +39,25 @@ class MobileGameManager extends GameManager{
   set connectionStatus(obj){
     this.connectionStatus = obj["connected"]
   }
+
+  //
+  // ─── INSTANCE HELPER FUNCTIONS ───────────────────────────────────────────────────────────────────────────
+  //
+
+  findBodyMatchingElement(matterBody, remove = false){
+    const container = this[`${matterBody.label}Container`]
+
+    if(!container){return console.log("There is no container for this element")}
+
+    const foundElement = container.find(element => element.matterBody === matterBody)
+    if(foundElement){
+      if(remove){foundElement.remove()}
+      return foundElement
+    } else {
+      console.log("matterBody not found in matching container")
+    }
+  }
+
 
   //
   // ─── MATTER + P5 ───────────────────────────────────────────────────────────────────────────
@@ -97,10 +116,10 @@ class MobileGameManager extends GameManager{
       this.sketch.pop()
       this.spaceship.show()
       
-      for(const bulletElement of this.bulletElementsContainer){
+      for(const bulletElement of this.bulletElementContainer){
         bulletElement.show()
       }
-      for(const completeAstroidElement of this.completeAstroidElementsContainer){
+      for(const completeAstroidElement of this.completeAstroidElementContainer){
         completeAstroidElement.show()
       }
 
@@ -134,7 +153,7 @@ class MobileGameManager extends GameManager{
       const x = GameManager.randomInt(100,900)
       const y = 100
       const completeAstroidElement = new CompleteAstroidElement(x, y, 0.2, context)
-      context.completeAstroidElementsContainer.push(completeAstroidElement)
+      context.completeAstroidElementContainer.push(completeAstroidElement)
     }, ms)
   }
 
@@ -143,33 +162,24 @@ class MobileGameManager extends GameManager{
       const context = this.game
       let outsideWorldContainer = Matter.Query.region(Composite.allBodies(context.world), context.world.bounds, {outside: true})
       for(const matterBody of outsideWorldContainer){
-        // checks if matterBody matches element in bulletElementsContainer and removes
-        const selectedBulletElement = context.bulletElementsContainer.find(bulletElement => bulletElement.matterBody === matterBody)
-        if(selectedBulletElement){selectedBulletElement.remove()}
-        // checks if matterBody matches element in compleAstroidElementsContainer and removes
-        const selectedCompleteAstroidElement = context.completeAstroidElementsContainer.find(completeAstroidElement => completeAstroidElement.matterBody === matterBody)
-        if(selectedCompleteAstroidElement){selectedCompleteAstroidElement.remove()}
+        context.findBodyMatchingElement(matterBody, true)
       }
       Composite.remove(context.world, outsideWorldContainer)
     }, 1000)
   }
 
-  initCollisionDetection(){
+  initCollisionDetection(context = this){
     Events.on(this.engine, 'collisionStart', function(event){
       const pairsArray = event.pairs;
 
       for( const pair of pairsArray){
-        if (pair.bodyA.label == "BulletElement"){
-          remove
+        if (pair.bodyA.label == "bulletElement"){
+          context.findBodyMatchingElement(pair.bodyA, true)
+        } else if (pair.bodyB.label == "bulletElement"){
+          context.findBodyMatchingElement(pair.bodyB, true)
         }
       }
-
-      // change object colours to show those starting a collision
-      // for (var i = 0; i < pairs.length; i++) {
-      //     var pair = pairs[i];
-      //     pair.bodyA.render.fillStyle = '#333';
-      //     pair.bodyB.render.fillStyle = '#333';
-      // }
+      
     })
   }
 

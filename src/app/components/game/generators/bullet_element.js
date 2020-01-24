@@ -15,12 +15,12 @@ class BulletElement extends GeneralElement {
 
     this.options = {
       frictionAir: 0,
-      label: "BulletElement"
+      label: "bulletElement"
     }
     this.texture = this.game.textureContainer["bulletImg"]
     this.produceMatter(x, y)
-    this.game.bulletElementsContainer.push(this)
-    this.container = this.game.bulletElementsContainer
+    this.game.bulletElementContainer.push(this)
+    this.container = this.game.bulletElementContainer
   }
 
   produceMatter(x, y){

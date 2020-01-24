@@ -15,7 +15,7 @@ class SpaceshipElement extends GeneralElement {
     this.options = {
       isStatic: true,
       mass: Infinity,
-      label: "SpaceshipElement"
+      label: "spaceshipElement"
     }
     this.verticesHash = Vertices.fromPath(GameManager.removeBrackets(this.game.elementVertices.spaceship.fixtures[0].hullPolygon))
     this.texture = this.game.textureContainer["spaceshipImg"]
@@ -29,7 +29,7 @@ class SpaceshipElement extends GeneralElement {
   }
 
   get gunPosition(){
-    return {x: (this.artificalMassCenter["x"])+(0 * this.scale), y: (this.artificalMassCenter["y"])+(-100 * this.scale)}
+    return {x: (this.artificalMassCenter["x"])+(0 * this.scale), y: (this.artificalMassCenter["y"])+(-150 * this.scale)}
   }
 }
 
