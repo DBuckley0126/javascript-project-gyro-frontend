@@ -2,13 +2,16 @@ global.decomp = require('poly-decomp');
 
 import Matter, { Query } from 'matter-js'
 import * as p5 from 'p5'
-import {GameManager, BoxElement, SpaceshipElement, BulletElement, CompleteAstroidElement} from '../../modules'
+import {GameManager, BoxElement, SpaceshipElement, BulletElement, CompleteAstroidElement, AstroidPartAElement, AstroidPartBElement, AstroidPartCElement} from '../../modules'
 import * as elementVerticesJSON from '../../../../assets/json/gyro_element_vertices.json'
 
 // IMAGES
 import spaceshipImgURL from '../../../../assets/img/spaceship.png'
 import bulletImgURL from '../../../../assets/img/bullet.png'
 import completeAstroidImgURL from '../../../../assets/img/complete-astroid.png'
+import astroidPartAImgURL from '../../../../assets/img/astroid-part-a.png'
+import astroidPartBImgURL from '../../../../assets/img/astroid-part-b.png'
+import astroidPartCImgURL from '../../../../assets/img/astroid-part-c.png'
 
 // module aliases
 const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Composite = Matter.Composite, Events = Matter.Events
@@ -23,13 +26,12 @@ class MobileGameManager extends GameManager{
     this.gunButtonPressed = false
     this.engine = null
     this.world = null
-    this.boxes = []
-    this.bulletElementContainer = []
-    this.completeAstroidElementContainer = []
+    this.initElementContainers()
     this.ground = null
     this.textureContainer = {}
     this.createGameInstance()
     this.elementVertices = elementVerticesJSON.default
+ 
   }
 
   //
@@ -58,6 +60,29 @@ class MobileGameManager extends GameManager{
     }
   }
 
+  initElementContainers(){
+    this.bulletElementContainer = []
+    this.completeAstroidElementContainer = []
+    this.astroidPartAElementContainer = []
+    this.astroidPartBElementContainer = []
+    this.astroidPartCElementContainer = []
+  }
+
+  showElements(){
+
+    this.spaceship.show()
+
+    // loops over containers listed in elementArray
+    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement']
+
+    for(const elementName of elementArray){
+      const container = this[`${elementName}Container`]
+      for(const element of container){
+        element.show()
+      }
+    }
+  }
+
 
   //
   // ─── MATTER + P5 ───────────────────────────────────────────────────────────────────────────
@@ -76,7 +101,14 @@ class MobileGameManager extends GameManager{
 
   preload(){
     this.sketch.preload = () => {
-      Object.assign(this.textureContainer, {spaceshipImg: this.sketch.loadImage(spaceshipImgURL)}, {bulletImg: this.sketch.loadImage(bulletImgURL)}, {completeAstroidImg: this.sketch.loadImage(completeAstroidImgURL)})
+      Object.assign(this.textureContainer, 
+        {spaceshipImg: this.sketch.loadImage(spaceshipImgURL)}, 
+        {bulletImg: this.sketch.loadImage(bulletImgURL)}, 
+        {completeAstroidImg: this.sketch.loadImage(completeAstroidImgURL)},
+        {astroidPartAImg: this.sketch.loadImage(astroidPartAImgURL)},
+        {astroidPartBImg: this.sketch.loadImage(astroidPartBImgURL)},
+        {astroidPartCImg: this.sketch.loadImage(astroidPartCImgURL)}
+      )
     }
   }
 
@@ -114,21 +146,11 @@ class MobileGameManager extends GameManager{
       this.sketch.rectMode(this.sketch.CENTER)
       this.sketch.rect(this.ground.position.x, this.ground.position.y, 1000, 200)
       this.sketch.pop()
-      this.spaceship.show()
-      
-      for(const bulletElement of this.bulletElementContainer){
-        bulletElement.show()
-      }
-      for(const completeAstroidElement of this.completeAstroidElementContainer){
-        completeAstroidElement.show()
-      }
+      this.showElements()
 
       this.reactToMovementControl()
       this.reactToGunControl()
 
-      this.boxes.forEach((box) => {
-        box.show()
-      })
     }
   }
 
@@ -152,7 +174,7 @@ class MobileGameManager extends GameManager{
     setInterval((context = this)=>{
       const x = GameManager.randomInt(100,900)
       const y = 100
-      const completeAstroidElement = new CompleteAstroidElement(x, y, 0.2, context)
+      const completeAstroidElement = new AstroidPartAElement(x, y, 1, context)
       context.completeAstroidElementContainer.push(completeAstroidElement)
     }, ms)
   }
@@ -179,7 +201,7 @@ class MobileGameManager extends GameManager{
           context.findBodyMatchingElement(pair.bodyB, true)
         }
       }
-      
+
     })
   }
 

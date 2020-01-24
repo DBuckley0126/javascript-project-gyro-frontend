@@ -19,7 +19,9 @@ export {DemoGame} from './components/demo_game/demo_game'
 
 // GENERATORS
 export {GeneralElement} from './components/game/generators/general_element'
-export {BoxElement} from './components/game/generators/box_element'
 export {SpaceshipElement} from './components/game/generators/spaceship_element'
 export {BulletElement} from './components/game/generators/bullet_element'
 export {CompleteAstroidElement} from './components/game/generators/complete_astroid_element'
+export {AstroidPartAElement} from './components/game/generators/astroid_part_a_element'
+// export {AstroidPartBElement} from './components/game/generators/astroid_part_b_element'
+// export {AstroidPartCElement} from './components/game/generators/astroid_part_c_element'

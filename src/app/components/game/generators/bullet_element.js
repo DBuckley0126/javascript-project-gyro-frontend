@@ -19,8 +19,8 @@ class BulletElement extends GeneralElement {
     }
     this.texture = this.game.textureContainer["bulletImg"]
     this.produceMatter(x, y)
-    this.game.bulletElementContainer.push(this)
     this.container = this.game.bulletElementContainer
+    this.container.push(this)
   }
 
   produceMatter(x, y){

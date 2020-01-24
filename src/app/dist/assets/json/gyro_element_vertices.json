@@ -26,9 +26,9 @@
 			}
 		]
 	},
-	"decontructedAstroidPartA": {
+	"astroidPartA": {
 		"type": "fromPhysicsEditor",
-		"label": "decontructedAstroidPartA",
+		"label": "astroidPartA",
 		"anchorPointRel":{ "x": 0.501,"y": 0.500 },
 		"anchorPointAbs":{"x":228.957, "y":138.000},
 		"size":{"width": 457.000, "height":276.000},
@@ -39,9 +39,9 @@
 			}
 		]
 	},
-	"decontructedAstroidPartB": {
+	"astroidPartB": {
 		"type": "fromPhysicsEditor",
-		"label": "decontructedAstroidPartB",
+		"label": "astroidPartB",
 		"anchorPointRel":{ "x": 0.500,"y": 0.502 },
 		"anchorPointAbs":{"x":162.000, "y":159.134},
 		"size":{"width": 324.000, "height":317.000},
@@ -52,9 +52,9 @@
 			}
 		]
 	},
-	"decontructedAstroidPartC": {
+	"astroidPartC": {
 		"type": "fromPhysicsEditor",
-		"label": "decontructedAstroidPartC",
+		"label": "astroidPartC",
 		"anchorPointRel":{ "x": 0.502,"y": 0.501 },
 		"anchorPointAbs":{"x":134.034, "y":186.873},
 		"size":{"width": 267.000, "height":373.000},
