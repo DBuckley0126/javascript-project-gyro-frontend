@@ -1,5 +1,5 @@
 #app-container #desktop-container {
-  display: none;
+  display: block;
 }
 #app-container #desktop-container #mobile-connected-alert {
   display: none;
@@ -18,19 +18,12 @@
   display: none;
 }
 
-#app-container #boxA {
-  color: red;
-  width: 80px;
-  height: 80px;
-}
-#app-container #canvas {
-  border: 1px dashed black;
+#app-container #desktop-game-container #desktop-game-canvas {
   position: fixed;
   top: 0;
   left: 0;
 }
-#app-container #matter-canvas {
-  border: 1px dashed black;
+#app-container #desktop-game-container #desktop-matter-developer-canvas {
   position: fixed;
   top: 0;
   left: 0;

@@ -1,7 +1,7 @@
 // const container = document.querySelector('#app-container')
 // window.AppManager = new AppManager(container)
 
-import {AppManager, MobileGameManager} from './modules'
+import {AppManager, MobileGameManager, DesktopGameManager} from './modules'
 import '../stylesheets/app.css'
 // import Matter from 'matter-js'
 
@@ -25,7 +25,7 @@ import '../stylesheets/app.css'
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  window.game = new MobileGameManager
+  window.game = new DesktopGameManager
 
   document.addEventListener('keydown', logKey);
 

@@ -1,28 +1,8 @@
 @use '../app/components/desktop_page/_desktop_page.scss';
 @use '../app/components/mobile_page/mobile_page';
+@use '../app/components/game/mobile_game_manager.scss';
+@use '../app/components/game/desktop_game_manager.scss';
 
 #app-container {
-
- #boxA{
-   color: red;
-   width: 80px;
-   height: 80px;
- }
-
- #canvas{
-   border: 1px dashed black;
-   position: fixed;
-   top: 0;
-   left: 0;
- }
-
- #matter-canvas{
-  border: 1px dashed black;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-
 
 }

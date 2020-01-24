@@ -22,6 +22,8 @@ class DesktopGameManager extends GameManager{
   constructor(PageManager){
     super(PageManager)
     this.initBindingsAndEventListeners()
+    this.currentWindowWidth = window.innerWidth
+    this.currentWindowHight = window.innerHeight
     this._axisX = 0
     this._axisY = 0
     this._axisZ = 0
@@ -53,8 +55,19 @@ class DesktopGameManager extends GameManager{
     this.scoreDisplay = this.container.querySelector("#desktop-game-score-display")
     
     // Initialise listeners
+    this.initWindowResizeListener()
     
     return Promise.resolve("Finished setting bindings and listeners")
+  }
+
+  initWindowResizeListener(){
+    window.addEventListener("resize", function(event){
+      console.log("resize window active")
+      this.currentWindowWidth = window.innerWidth
+      this.currentWindowHight = window.innerHeight
+      this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
+      this.world.bounds = {min:{x: -500 ,y: -500}, max: {x: this.currentWindowWidth + 500, y: this.currentWindowHight + 500}}
+    }.bind(this))
   }
 
   findBodyMatchingElement(matterBody, remove = false){
@@ -144,6 +157,7 @@ class DesktopGameManager extends GameManager{
       this.showScore()
       this.sketch.pop()
       this.showElements()
+      this.showScore()
 
       this.reactToMovementControl()
       this.reactToGunControl()
@@ -169,8 +183,8 @@ class DesktopGameManager extends GameManager{
   }
 
   showScore(){
-    let currentFrameCount = this.sketch.frameCount
-
+    let currentFrameCount = this.sketch.frameCount()
+    
   }
 
     
@@ -278,7 +292,7 @@ class DesktopGameManager extends GameManager{
   //
 
   initSpawnerEngine(){
-
+    
   }
 
   randomBoxDrop(ms){
@@ -295,11 +309,11 @@ class DesktopGameManager extends GameManager{
 
   produceDevCanvas(){
     this.render = Render.create({
-      element: this.container.querySelector("#desktop-game-canvas"),
+      element: this.container.querySelector("#desktop-matter-developer-canvas"),
       engine: this.engine,
       options: {
-          width: window.innerWidth,
-          height: window.innerHeight,
+          width: this.currentWindowWidth,
+          height: this.currentWindowHight,
           pixelRatio: 1,
           background: 'transparent',
           wireframeBackground: 'transparent',
