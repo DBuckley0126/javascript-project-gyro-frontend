@@ -73,7 +73,7 @@ class MobileGameManager extends GameManager{
     this.spaceship.show()
 
     // loops over containers listed in elementArray
-    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement']
+    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement', 'astroidPartBElement', 'astroidPartCElement']
 
     for(const elementName of elementArray){
       const container = this[`${elementName}Container`]
@@ -174,7 +174,7 @@ class MobileGameManager extends GameManager{
     setInterval((context = this)=>{
       const x = GameManager.randomInt(100,900)
       const y = 100
-      const completeAstroidElement = new AstroidPartAElement(x, y, 1, context)
+      const completeAstroidElement = new AstroidPartCElement(x, y, 1, context)
       context.completeAstroidElementContainer.push(completeAstroidElement)
     }, ms)
   }
