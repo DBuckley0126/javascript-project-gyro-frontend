@@ -21,6 +21,7 @@ class MobileGameManager extends GameManager{
 
   constructor(PageManager){
     super(PageManager)
+    this.initBindingsAndEventListeners()
     this._axisX = 0
     this._axisY = 0
     this._axisZ = 0
@@ -28,11 +29,9 @@ class MobileGameManager extends GameManager{
     this.engine = null
     this.world = null
     this.initElementContainers()
-    this.ground = null
     this.textureContainer = {}
     this.createGameInstance()
     this.elementVertices = elementVerticesJSON.default
- 
   }
 
   //
@@ -46,6 +45,16 @@ class MobileGameManager extends GameManager{
   //
   // ─── INSTANCE HELPER FUNCTIONS ───────────────────────────────────────────────────────────────────────────
   //
+
+  initBindingsAndEventListeners(){
+    // Set AppManagers attributes to HTML elements
+    this.container = document.querySelector("#mobile-game-container")
+    this.scoreDisplay = this.container.querySelector("#mobile-game-score-display")
+    
+    // Initialise listeners
+    
+    return Promise.resolve("Finished setting bindings and listeners")
+  }
 
   findBodyMatchingElement(matterBody, remove = false){
     const container = this[`${matterBody.label}Container`]
@@ -75,28 +84,13 @@ class MobileGameManager extends GameManager{
     this.particleRockElementContainer = []
   }
 
-  showElements(){
-
-    this.spaceship.show()
-
-    // loops over containers listed in elementArray
-    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement', 'astroidPartBElement', 'astroidPartCElement', 'particleRockElement']
-
-    for(const elementName of elementArray){
-      const container = this[`${elementName}Container`]
-      for(const element of container){
-        element.show()
-      }
-    }
-  }
-
 
   //
   // ─── MATTER + P5 ───────────────────────────────────────────────────────────────────────────
   //
 
   createGameInstance(){
-    this.P5engine = new p5((sketch) => {this.initSketchInstance(sketch)}, document.querySelector('#canvas'))
+    this.P5engine = new p5((sketch) => {this.initSketchInstance(sketch)}, this.container.querySelector('#mobile-game-canvas'))
   }
 
   initSketchInstance(sketch){
@@ -128,15 +122,10 @@ class MobileGameManager extends GameManager{
       this.engine = Engine.create({constraintIterations: 4})
       this.world = this.engine.world
       this.world.gravity.y = 0
-      debugger
       this.world.bounds = {min:{x: -500 ,y: -500}, max: {x: window.innerWidth + 500, y: window.innerHeight + 500}}
-      this.ground = Bodies.rectangle(500, 900, 1000, 200, {isStatic: true})
       this.spaceship = new SpaceshipElement(500, 800, 0.5, this)
-      this.ground.label = "ground"
       this.lastTimeGunFired = 0
 
-      World.add(this.world, [this.ground])
-      // this.randomBoxDrop(1000)
       this.deconstructedAstroidGroup = new DeconstructedAstroidGroup(500, 200, 0.3, this)
 
       this.produceDevCanvas()
@@ -151,10 +140,7 @@ class MobileGameManager extends GameManager{
       Engine.update(this.engine)
       this.sketch.push()
       this.sketch.background(51)
-      this.sketch.noStroke(255)
-      this.sketch.fill(170)
-      this.sketch.rectMode(this.sketch.CENTER)
-      this.sketch.rect(this.ground.position.x, this.ground.position.y, 1000, 200)
+      this.showScore()
       this.sketch.pop()
       this.showElements()
 
@@ -163,6 +149,30 @@ class MobileGameManager extends GameManager{
 
     }
   }
+
+  //
+  // ─── DRAW FUNCTIONS ───────────────────────────────────────────────────────────────────────────
+  //
+
+  showElements(){
+    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement', 'astroidPartBElement', 'astroidPartCElement', 'particleRockElement']
+    this.spaceship.show()
+    
+    // loops over containers listed in elementArray
+    for(const elementName of elementArray){
+      const container = this[`${elementName}Container`]
+      for(const element of container){
+        element.show()
+      }
+    }
+  }
+
+  showScore(){
+    let currentFrameCount = this.sketch.frameCount
+
+  }
+
+    
 
   reactToMovementControl(){
     const startingPoint = 500
@@ -178,14 +188,6 @@ class MobileGameManager extends GameManager{
       new BulletElement(this.spaceship.gunPosition["x"], this.spaceship.gunPosition["y"], 1, this)
       this.lastTimeGunFired = Date.now()
     }
-  }
-
-  randomBoxDrop(ms){
-    setInterval((context = this)=>{
-      const x = GameManager.randomInt(100,900)
-      const y = 100
-      const particleRockElement = new ParticleRockDestroyPartGroup(x, y, 0.5, context)
-    }, ms)
   }
 
   initIntervalCleanUp(){
@@ -278,13 +280,21 @@ class MobileGameManager extends GameManager{
 
   }
 
+  randomBoxDrop(ms){
+    setInterval((context = this)=>{
+      const x = GameManager.randomInt(100,900)
+      const y = 100
+      const particleRockElement = new ParticleRockDestroyPartGroup(x, y, 0.5, context)
+    }, ms)
+  }
+
   //
   // ─── DEVELOPMENT CANVAS ───────────────────────────────────────────────────────────────────────────
   //
 
   produceDevCanvas(){
     this.render = Render.create({
-      element: document.querySelector("#matter-canvas"),
+      element: this.container.querySelector("#mobile-game-canvas"),
       engine: this.engine,
       options: {
           width: window.innerWidth,
