@@ -161,7 +161,6 @@ class DesktopGameManager extends GameManager{
 
       this.reactToMovementControl()
       this.reactToGunControl()
-
     }
   }
 
@@ -183,8 +182,9 @@ class DesktopGameManager extends GameManager{
   }
 
   showScore(){
-    let currentFrameCount = this.sketch.frameCount()
-    
+    let currentFrameCount = this.sketch.frameCount
+    let currentScore = Math.floor( currentFrameCount / 10 )
+    this.scoreDisplay.innerText = currentScore
   }
 
     

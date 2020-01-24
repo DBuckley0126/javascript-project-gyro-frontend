@@ -8,5 +8,13 @@
   top: 0;
   left: 0;
 }
+#app-container #desktop-game-container #desktop-game-score-display {
+  position: relative;
+  top: 20vh;
+  left: 40vw;
+  width: 100px;
+  height: 50px;
+  background-color: red;
+}
 
 /*# sourceMappingURL=desktop_game_manager.css.map */

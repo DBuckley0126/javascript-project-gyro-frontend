@@ -55,9 +55,9 @@ class GeneralElement {
     this.game.sketch.imageMode(this.game.sketch.CENTER)
     this.game.sketch.scale(this.scale)
     this.game.sketch.image(this.texture, this.scaledAxisMove()['x'] , this.scaledAxisMove()['y'], this.width, this.height)
-    this.game.sketch.stroke('purple')
-    this.game.sketch.strokeWeight(10)
-    this.game.sketch.point(0, 0)
+    // this.game.sketch.stroke('purple')
+    // this.game.sketch.strokeWeight(10)
+    // this.game.sketch.point(0, 0)
     this.game.sketch.pop()
   }
 }
