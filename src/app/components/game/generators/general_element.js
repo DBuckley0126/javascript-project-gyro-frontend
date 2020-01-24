@@ -32,13 +32,20 @@ class GeneralElement {
     if(this.container){
       Composite.remove(this.game.world, this.matterBody)
       const removedElementsArray = this.container.splice(this.index, 1)
-      console.log("Removed " + removedElementsArray[0].constructor.name)
+      console.log("Removed " + removedElementsArray[0].constructor.name + " from container")
       return removedElementsArray[0]
     } else {
       Composite.remove(this.game.world, this.matterBody)
       console.log("Removed from world but not from container array")
       return this
     }
+  }
+
+  containsMatterBody(matterBody){
+    for(const matterBodypart of this.matterBody.parts){
+      if(matterBodypart === matterBody){return matterBodypart}
+    }
+    return false
   }
   
   show(){

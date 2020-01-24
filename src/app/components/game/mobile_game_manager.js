@@ -2,7 +2,7 @@ global.decomp = require('poly-decomp');
 
 import Matter, { Query } from 'matter-js'
 import * as p5 from 'p5'
-import {GameManager, BoxElement, SpaceshipElement, BulletElement, CompleteAstroidElement, AstroidPartAElement, AstroidPartBElement, AstroidPartCElement} from '../../modules'
+import {GameManager, BoxElement, SpaceshipElement, BulletElement, CompleteAstroidElement, AstroidPartAElement, AstroidPartBElement, AstroidPartCElement, DeconstructedAstroidGroup, ParticleRockElement, ParticleRockDestroyPartGroup} from '../../modules'
 import * as elementVerticesJSON from '../../../../assets/json/gyro_element_vertices.json'
 
 // IMAGES
@@ -12,6 +12,7 @@ import completeAstroidImgURL from '../../../../assets/img/complete-astroid.png'
 import astroidPartAImgURL from '../../../../assets/img/astroid-part-a.png'
 import astroidPartBImgURL from '../../../../assets/img/astroid-part-b.png'
 import astroidPartCImgURL from '../../../../assets/img/astroid-part-c.png'
+import particleRockImgURL from '../../../../assets/img/particle-rock.png'
 
 // module aliases
 const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Composite = Matter.Composite, Events = Matter.Events
@@ -49,14 +50,19 @@ class MobileGameManager extends GameManager{
   findBodyMatchingElement(matterBody, remove = false){
     const container = this[`${matterBody.label}Container`]
 
-    if(!container){return console.log("There is no container for this element")}
+    if(!container){
+      console.log(matterBody.label)
+      return console.log("There is no container for this element ^^^")
+    }
 
-    const foundElement = container.find(element => element.matterBody === matterBody)
+    const foundElement = container.find(element => element.containsMatterBody(matterBody))
     if(foundElement){
       if(remove){foundElement.remove()}
       return foundElement
     } else {
+      console.log(matterBody)
       console.log("matterBody not found in matching container")
+      console.log(container)
     }
   }
 
@@ -66,6 +72,7 @@ class MobileGameManager extends GameManager{
     this.astroidPartAElementContainer = []
     this.astroidPartBElementContainer = []
     this.astroidPartCElementContainer = []
+    this.particleRockElementContainer = []
   }
 
   showElements(){
@@ -73,7 +80,7 @@ class MobileGameManager extends GameManager{
     this.spaceship.show()
 
     // loops over containers listed in elementArray
-    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement', 'astroidPartBElement', 'astroidPartCElement']
+    const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement', 'astroidPartBElement', 'astroidPartCElement', 'particleRockElement']
 
     for(const elementName of elementArray){
       const container = this[`${elementName}Container`]
@@ -107,28 +114,31 @@ class MobileGameManager extends GameManager{
         {completeAstroidImg: this.sketch.loadImage(completeAstroidImgURL)},
         {astroidPartAImg: this.sketch.loadImage(astroidPartAImgURL)},
         {astroidPartBImg: this.sketch.loadImage(astroidPartBImgURL)},
-        {astroidPartCImg: this.sketch.loadImage(astroidPartCImgURL)}
+        {astroidPartCImg: this.sketch.loadImage(astroidPartCImgURL)},
+        {particleRockImg: this.sketch.loadImage(particleRockImgURL)},
       )
     }
   }
 
   setup(){
     this.sketch.setup = () =>{
-      this.sketch.createCanvas(1000, 1000)
+      this.sketch.createCanvas(window.innerWidth, window.innerHeight)
       this.sketch.background(40)
       this.sketch.frameRate(60)
-
-      this.engine = Engine.create()
+      this.engine = Engine.create({constraintIterations: 4})
       this.world = this.engine.world
       this.world.gravity.y = 0
-      this.world.bounds = {min:{x: -500 ,y: -500}, max: {x: 1500, y: 1500}}
+      debugger
+      this.world.bounds = {min:{x: -500 ,y: -500}, max: {x: window.innerWidth + 500, y: window.innerHeight + 500}}
       this.ground = Bodies.rectangle(500, 900, 1000, 200, {isStatic: true})
       this.spaceship = new SpaceshipElement(500, 800, 0.5, this)
       this.ground.label = "ground"
       this.lastTimeGunFired = 0
 
       World.add(this.world, [this.ground])
-      this.randomBoxDrop(2000)
+      // this.randomBoxDrop(1000)
+      this.deconstructedAstroidGroup = new DeconstructedAstroidGroup(500, 200, 0.3, this)
+
       this.produceDevCanvas()
       this.initIntervalCleanUp()
       this.initCollisionDetection()
@@ -174,8 +184,7 @@ class MobileGameManager extends GameManager{
     setInterval((context = this)=>{
       const x = GameManager.randomInt(100,900)
       const y = 100
-      const completeAstroidElement = new AstroidPartCElement(x, y, 1, context)
-      context.completeAstroidElementContainer.push(completeAstroidElement)
+      const particleRockElement = new ParticleRockDestroyPartGroup(x, y, 0.5, context)
     }, ms)
   }
 
@@ -194,43 +203,111 @@ class MobileGameManager extends GameManager{
     Events.on(this.engine, 'collisionStart', function(event){
       const pairsArray = event.pairs;
 
-      for( const pair of pairsArray){
-        if (pair.bodyA.label == "bulletElement"){
-          context.findBodyMatchingElement(pair.bodyA, true)
-        } else if (pair.bodyB.label == "bulletElement"){
-          context.findBodyMatchingElement(pair.bodyB, true)
+
+      for( const pair of pairsArray ){
+        // Checks if pair contains a matterBody for a astroid part A/B/C and bullet, returns matterBody of astroid part or false
+        const matterBodyForAstroidPart = context.collisionBulletAndAstroidPart(pair)
+        // Checks if pair contains a matterBody for a  bullet, returns matterBody of bullet or false
+        const matterBodyForBullet = context.collisonBullet(pair)
+
+        // Checks if pair contains a matterBody for a astroid part A/B/C and bullet
+        if (matterBodyForAstroidPart){
+          const matchingElement = context.findBodyMatchingElement(matterBodyForAstroidPart)
+          if(matchingElement){matchingElement.minusHealth()}
+        }
+
+        // Checks if pair contains a matterBody for a bullet
+        if (matterBodyForBullet){
+          const matterBodyPositionX = matterBodyForBullet.position.x
+          const matterBodyPositionY = matterBodyForBullet.position.y
+          context.findBodyMatchingElement(matterBodyForBullet, true)
+          new ParticleRockDestroyPartGroup(matterBodyPositionX, matterBodyPositionY, 0.1, context, true, 1000, 2, 5)
         }
       }
 
     })
   }
 
+  //
+  // ─── COLLISION QUERY HELPERS ───────────────────────────────────────────────────────────────────────────
+  //
+
+  // Checks if pair contains a matterBody for a astroid part A/B/C and bullet
+  collisionBulletAndAstroidPart(pair){
+    let pairContainsBullet = false
+    let astroidPartMatterBody = null
+    //Checks if pair contains a matterBody for a astroid part A/B/C
+    if(pair.bodyA.label === "astroidPartAElement" || pair.bodyA.label ===  "astroidPartBElement" || pair.bodyA.label === "astroidPartCElement"){
+      astroidPartMatterBody = pair.bodyA
+    } else if(pair.bodyB.label === "astroidPartAElement" || pair.bodyB.label === "astroidPartBElement" || pair.bodyB.label === "astroidPartCElement"){
+      astroidPartMatterBody = pair.bodyB
+    }
+    // Checks if pair contains a matterBody for a bulletElement
+    if(pair.bodyA.label == "bulletElement" || pair.bodyB.label == "bulletElement"){
+      pairContainsBullet = true
+    }
+    // If pair contains bullet and Astroid part, return the body of astroid part
+    if(astroidPartMatterBody && pairContainsBullet){
+      return astroidPartMatterBody
+    } else {
+      return false
+    }
+  }
+  
+  // Checks if pair contains a matterBody for a bullet
+  collisonBullet(pair){
+    let bulletMatterBody = null
+    if (pair.bodyA.label == "bulletElement"){
+      bulletMatterBody = pair.bodyA
+    } else if (pair.bodyB.label == "bulletElement"){
+      bulletMatterBody = pair.bodyB
+    }
+
+    if (bulletMatterBody){
+      return bulletMatterBody
+    } else {
+      return false
+    }
+  }
+
+  //
+  // ─── SPAWNER ENGINE ───────────────────────────────────────────────────────────────────────────
+  //
+
+  initSpawnerEngine(){
+
+  }
+
+  //
+  // ─── DEVELOPMENT CANVAS ───────────────────────────────────────────────────────────────────────────
+  //
+
   produceDevCanvas(){
     this.render = Render.create({
       element: document.querySelector("#matter-canvas"),
       engine: this.engine,
       options: {
-          width: 1000,
-          height: 1000,
+          width: window.innerWidth,
+          height: window.innerHeight,
           pixelRatio: 1,
           background: 'transparent',
           wireframeBackground: 'transparent',
           hasBounds: false,
           enabled: true,
           wireframes: true,
-          showSleeping: true,
+          showSleeping: false,
           showDebug: false,
           showBroadphase: false,
-          showBounds: true,
-          showVelocity: false,
-          showCollisions: false,
+          showBounds: false,
+          showVelocity: true,
+          showCollisions: true,
           showSeparations: false,
-          showAxes: true,
-          showPositions: false,
-          showAngleIndicator: true,
+          showAxes: false,
+          showPositions: true,
+          showAngleIndicator: false,
           showIds: false,
           showShadows: false,
-          showVertexNumbers: true,
+          showVertexNumbers: false,
           showConvexHulls: false,
           showInternalEdges: false,
           showMousePosition: false

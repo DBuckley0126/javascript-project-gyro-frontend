@@ -25,3 +25,6 @@ export {CompleteAstroidElement} from './components/game/generators/complete_astr
 export {AstroidPartAElement} from './components/game/generators/astroid_part_a_element'
 export {AstroidPartBElement} from './components/game/generators/astroid_part_b_element'
 export {AstroidPartCElement} from './components/game/generators/astroid_part_c_element'
+export {DeconstructedAstroidGroup} from './components/game/generators/deconstructed_astroid_group'
+export {ParticleRockElement} from './components/game/generators/particle_rock_element'
+export {ParticleRockDestroyPartGroup} from './components/game/generators/particle_rock_destroy_part_group'
