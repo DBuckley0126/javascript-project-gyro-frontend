@@ -17,7 +17,6 @@
 #app-container #desktop-container #desktop-game-cancel-button {
   display: none;
 }
-
 #app-container #mobile-container {
   display: none;
 }
@@ -27,6 +26,9 @@
 #app-container #mobile-container #mobile-game-cancel-button {
   display: none;
 }
+#app-container #mobile-container #mobile-game-waiting-alert {
+  display: none;
+}
 
 #app-container #mobile-game-container {
   display: none;
@@ -34,6 +36,36 @@
 
 #app-container #desktop-game-container {
   display: none;
+}
+#app-container #desktop-game-container #desktop-game-mobile-connection-warning {
+  display: none;
+  position: relative;
+  top: 50vh;
+  left: 50vw;
+  width: 300px;
+  height: 100px;
+  border-radius: 10px;
+  border-color: #272727;
+  background: #686868;
+  border-width: 5px;
+  font-size: 60px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  color: black;
+}
+#app-container #desktop-game-container #desktop-game-mobile-active-warning {
+  display: none;
+  position: relative;
+  top: 50vh;
+  left: 50vw;
+  width: 300px;
+  height: 100px;
+  border-radius: 10px;
+  border-color: #272727;
+  background: #686868;
+  border-width: 5px;
+  font-size: 60px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  color: black;
 }
 #app-container #desktop-game-container #desktop-game-canvas {
   position: fixed;
@@ -77,6 +109,10 @@
   height: 30px;
   padding-left: 10vw;
   margin: 0;
+}
+
+#app-container {
+  background-color: white;
 }
 
 /*# sourceMappingURL=app.css.map */

@@ -21,8 +21,10 @@ class ParticleRockElement extends GeneralElement {
     this.verticesHash = Vertices.fromPath(GameManager.removeBrackets(this.game.elementVertices.particleRock.fixtures[0].hullPolygon))
     this.texture = this.game.textureContainer["particleRockImg"]
     this.produceMatter(x, y)
+  
     this.container = this.game.particleRockElementContainer
     this.container.push(this)
+    
 
     if (this.timeout){
       this.deleteElementAfterTimeout(this.randomMs())

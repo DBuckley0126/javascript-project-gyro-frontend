@@ -40,6 +40,7 @@ class MobilePageManager{
     this.desktopDisconnectAlert = this.container.querySelector("#desktop-disconnected-alert")
     this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
     this.cancelGameButton = this.container.querySelector("#mobile-game-cancel-button")
+    this.waitingAlert = this.container.querySelector("#mobile-game-waiting-alert")
 
     // Initialise listeners
     this.addJoinGameListener(this.joinGameButton)
@@ -76,32 +77,6 @@ class MobilePageManager{
     })
   }
 
-  addGyroscopeListener(element){
-    element.addEventListener('deviceorientation', (event,context = this) => {
-      let tempX = event.gamma; // In degree in the range [-90,90]
-      let tempY = event.beta
-
-      // Because we don't want to have the device upside down
-      // We constrain the x value to the range [-90,90]
-      if (tempX >  90) { tempX =  90};
-      if (tempX < -90) { tempX = -90};
-
-      // Because we don't want to have the device upside down
-      // We constrain the y value to the range [-90,90]
-      if (tempY >  90) { tempY =  90};
-      if (tempY < -90) { tempY = -90};
-
-
-      // To make computation easier we shift the range of
-      tempX += 90;
-
-      // Round value to nearest whole number
-      context.gyroscopeData = {x: Math.round(tempX), y: Math.round(tempY), z: null}
-
-      context.MobileGameManager.sensorData = {x: context.gyroscopeData["x"], y: context.gyroscopeData["y"]}
-
-    })
-  }
 
 
   //
@@ -136,6 +111,9 @@ class MobilePageManager{
       sensorDataRelay: function(payload){
         this.perform('sensor_data_relay', payload)
       },
+      gameState: function(payload){
+        this.perform('game_state', payload)
+      },
       rejected: function(data){
         let error = {type:"connection_failed", statusText: `Failed to join game with join code ${joinCode}`}
         context.failureNotice(error)
@@ -143,9 +121,9 @@ class MobilePageManager{
       cancelGame: function(payload){
         this.perform('cancel_game', payload)
       },
-      unsubscribed: function(payload){
-        this.perform('unsubscribed', payload)
+      unsubscribed: function(){
         this.unsubscribe()
+        // this.perform('unsubscribed', payload)
       }
     })
   }
@@ -160,12 +138,11 @@ class MobilePageManager{
         switch(data["action"]){
           case "game_join_success":
             console.log("Join game success")
-            this.MobileGameManager = new MobileGameManager(this)
             this.joinGameButton.style.display = "none"
             this.joinCodeInput.style.display = "none"
             this.cancelGameButton.style.display = "block"
-            this.addGyroscopeListener(window)
-            this.addGryoscopeBroadcaster(window)
+            this.waitingAlert.style.display = "block"
+            this.MobileGameManager = new MobileGameManager(this)
             this.initDesktopConnectionObserver()
             break
         }
@@ -175,7 +152,13 @@ class MobilePageManager{
         console.log("Desktop ping received")
         this.lastPingFromDesktop = Date.now()
         break
+      case "game_state":
+        console.log("game_state received")
+        console.log(data)
+        this.gameStateHandler(data)
+        break
       case "cancel_game":
+        console.log("cancel_game received")
         this.cancelGame(data)
         case "unsubscribed":
           let device = null
@@ -193,13 +176,30 @@ class MobilePageManager{
   }
 
   //
+  // ─── GAME STATE HANDLER ───────────────────────────────────────────────────────────────────────────
+  //
+
+  gameStateHandler(data){
+    switch(data["body"]["action"]){
+      case "start_game":
+      
+      // this.waitingAlert.style.display = "none"
+      break
+    }
+  }
+    
+
+  //
   // ─── CANCEL GAME REQUEST RECEIVED───────────────────────────────────────────────────────────────────────────
   //
 
   cancelGame(data){
-    this.gameCable.unsubscribed({action:"mobile_unsubscribe", type:"unsubscribed", body: {device: "mobile"}})
+    //{action:"mobile_unsubscribe", type:"unsubscribed", body: {device: "mobile"}}
+    this.gameCable.unsubscribed()
+    this.MobileGameManager.destroyAndHideGame()
     clearInterval(this.desktopConnectionObserverIntervalID)
     clearInterval(this.gryoscropeBroadcasterIntervalID)
+    this.waitingAlert.style.display = "none"
     this.joinGameButton.style.display = "block"
     this.joinCodeInput.value = ""
     this.joinCodeInput.style.display = "block"
@@ -229,22 +229,6 @@ class MobilePageManager{
   }
 
   //
-  // ─── BROADCASTERS ───────────────────────────────────────────────────────────────
-  //
-    
-  addGryoscopeBroadcaster(element){
-    this.gryoscropeBroadcasterIntervalID = element.setInterval(()=>{
-      this.gameCable.sensorDataRelay({
-        action:"gyroscrope_data_push", 
-        type:"sensor_data_relay", 
-        body:{
-          x: this.gyroscopeData.x, 
-          y: this.gyroscopeData.y, 
-          user_active: this.userActive == true
-        }}, 100)
-  })}
-
-  //
   // ─── CONNECTION OBSERVERS ───────────────────────────────────────────────────────
   //
   
@@ -254,7 +238,7 @@ class MobilePageManager{
       if(this.lastPingFromDesktop < Date.now()-1500){
         this.desktopConnected = false
         this.desktopDisconnectAlert.style.display = "block"
-        this.MobileGameManager.connectionStatus = {connection: false}
+        // this.MobileGameManager.connectionStatus = {connection: false}
       } else {
         this.desktopConnected = true
         this.desktopDisconnectAlert.style.display = "none"

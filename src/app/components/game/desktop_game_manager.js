@@ -56,10 +56,12 @@ class DesktopGameManager extends GameManager{
   initBindingsAndEventListeners(){
     // Set AppManagers attributes to HTML elements
     this.container = document.querySelector("#desktop-game-container")
+    this.gameCanvas = this.container.querySelector('#desktop-game-canvas')
     this.scoreDisplay = this.container.querySelector("#desktop-game-score-display")
     this.endScene = this.container.querySelector("#desktop-game-end-scene")
     this.endSceneScore = this.container.querySelector("#desktop-game-end-scene-score")
     this.exitGameButton = this.container.querySelector("#desktop-game-end-scene-exit-button")
+    this.endSceneInput = this.container.querySelector('#desktop-game-end-scene-input')
     
     
     // Initialise listeners
@@ -69,8 +71,23 @@ class DesktopGameManager extends GameManager{
     return Promise.resolve("Finished setting bindings and listeners")
   }
 
+  pauseGame(){
+    this.sketch.noLoop()
+  }
+
+  resumeGame(){
+    this.sketch.loop()
+  }
+
+  //
+  // ─── LISTENERS ───────────────────────────────────────────────────────────────────────────
+  //
+
   initExitButtonListener(){
     this.exitGameButton.addEventListener('click', function(){
+      if(this.endSceneInput.value !== ""){
+        this.sendScoreLeaderboard(this.endSceneInput.value, this.finalScore)
+      }
       this.destroyAndHideGame()
     }.bind(this))
   }
@@ -129,13 +146,39 @@ class DesktopGameManager extends GameManager{
     console.log("game ended")
   }
 
+  sendScoreLeaderboard(nickname, finalScore){
+    let configurationObject = {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nickname: nickname,
+        score: finalScore 
+      })
+    }
+    async function send() {
+      try{
+      let res = await fetch(this.pageManager.appURL + `/leaderboard`, configurationObject)
+      this.pageManager.checkRes(res)
+      let json = await res.json()
+      let returnedLeaderboardResults = json.data
+      this.pageManager.updateLeaderboard(returnedLeaderboardResults)
+
+      }catch(error){
+        this.pageManager.failureNotice(error)
+      }
+    }
+    send()
+  }
 
   //
   // ─── MATTER + P5 ───────────────────────────────────────────────────────────────────────────
   //
 
   createGameInstance(){
-    this.P5engine = new p5((sketch) => {this.initSketchInstance(sketch)}, this.container.querySelector('#desktop-game-canvas'))
+    this.P5engine = new p5((sketch) => {this.initSketchInstance(sketch)}, this.gameCanvas)
   }
 
   initSketchInstance(sketch){

@@ -1,6 +1,7 @@
 #app-container {
 
   #mobile-container{
+    background-color: white;
     display:none;
 
     #desktop-disconnected-alert{
@@ -8,6 +9,10 @@
     }
 
     #mobile-game-cancel-button{
+      display: none;
+    }
+
+    #mobile-game-waiting-alert{
       display: none;
     }
     

@@ -12,6 +12,18 @@ class DesktopPageManager{
     this.lastPingFromMobile = null
     this.mobileConnected = false
     this.mobileActive = false
+    if(window.location.hostname == "localhost"){
+      this.appURL = `http://localhost:3000/`
+    } else {
+      this.appURL = `https://javascript-project-gyro-back.herokuapp.com/`
+    }
+  }
+
+  // Helper to check response of fetch request
+  checkRes(res){
+    if(!res.ok){
+      throw res
+    }
   }
 
   // Inital render of desktop
@@ -40,6 +52,8 @@ class DesktopPageManager{
     this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
     this.startGameButton = this.container.querySelector("#start-game-button")
     this.cancelGameButton = this.container.querySelector("#desktop-game-cancel-button")
+    this.mobileConnectionWarning = this.container.querySelector("#desktop-game-mobile-connection-warning")
+    this.mobileUnactiveWarning = this.container.querySelector("#desktop-game-mobile-active-warning")
 
     // Initialise listeners
     this.addCreateGameListener(this.createGameButton)
@@ -66,26 +80,11 @@ class DesktopPageManager{
 
     element.addEventListener("click", event => {
       if(this.mobileActive){
-        // Attempt fullscreen
-        const context = this
-        async function fullScreenLock(){
-          try{
-            await context.openFullscreen(context.container)
-            console.log("Fullscreen granted")
-            if(context.deviceType === "mobile"){
-              await screen.orientation.lock("portrait-primary")
-              console.log("Mobile screen orientation locked")
-            } 
-  
-          }catch(error){
-            context.failureNotice(error)
-          }
-        }
-        fullScreenLock()
         // Start game instance
+        this.gameCable.gameState({action:"start_game", type:"game_state", body: {action: "start_game"}})
         this.DesktopGameManager = new DesktopGameManager(this)
         this.startGameButton.innerText = "Play again"
-
+        
       } else {
         this.alertNotice({type:"refuse_game", statusText: "WARNING: Can not start game unless mobile connection active"})
         this.startGameButton.style.display = "none"
@@ -99,25 +98,6 @@ class DesktopPageManager{
       this.gameCable.cancelGame({action:"desktop_canceled_game", type:"cancel_game", body: {device: "desktop"}})
     })
   }
-
-  // Request fullscreen from browser
-  openFullscreen(element) {
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else if (element.mozRequestFullScreen) { /* Firefox */
-      element.mozRequestFullScreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else if (element.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-      element.webkitRequestFullscreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else if (element.msRequestFullscreen) { /* IE/Edge */
-      element.msRequestFullscreen();
-      return Promise.resolve("Request fullscreen granted")
-    } else {
-      return Promise.reject("Request fullscreen denied")
-    }
-  }  
 
 
   // Create cable connection for consumer(Unique user)
@@ -152,6 +132,9 @@ class DesktopPageManager{
       sensorDataRelay: function(payload){
         this.perform('sensor_data_relay', payload)
       },
+      gameState: function(payload){
+        this.perform('game_state', payload)
+      },
       rejected: function(data){
         let error = {type:"connection_rejected", statusText: `Failed to create game for join code ${joinCode}`}
         clearInterval(this.desktopPingIntervalID)
@@ -162,9 +145,9 @@ class DesktopPageManager{
       cancelGame: function(payload){
         this.perform('cancel_game', payload)
       },
-      unsubscribed: function(payload){
-        this.perform('unsubscribed', payload)
+      unsubscribed: function(){
         this.unsubscribe()
+        // this.perform('unsubscribed', payload)
       }
     })
   }
@@ -220,7 +203,9 @@ class DesktopPageManager{
   }
 
   cancelGame(data){
-    if(this.gameCable){this.gameCable.unsubscribed({action:"desktop_unsubscribe", type:"unsubscribed", body: {device: "desktop"}})}
+    // {action:"desktop_unsubscribe", type:"unsubscribed", body: {device: "desktop"}}
+    if(this.gameCable){this.gameCable.unsubscribed()}
+    if(this.DesktopGameManager){this.DesktopGameManager.destroyAndHideGame()}
     clearInterval(this.desktopPingIntervalID)
     clearInterval(this.mobileConnectionObserverIntervalID)
     this.mobileConnected = false
@@ -259,23 +244,41 @@ class DesktopPageManager{
   initMobileConnectionObserver(){
     this.mobileConnectionObserverIntervalID = setInterval(()=>{
       // checks if mobile is connected
-      if(this.lastPingFromMobile < Date.now()-1500){
+      if(this.lastPingFromMobile < Date.now()-10000 && this.DesktopGameManager){
+        this.cancelGame({body:{device: "desktop"}})
+      }else if(this.lastPingFromMobile < Date.now()-2000){
+        if(this.DesktopGameManager){
+          this.DesktopGameManager.pauseGame()
+          this.mobileConnectionWarning.style.display = "block"
+        }
         this.mobileConnected = false
         this.mobileConnectedAlert.style.display = "none"
         this.startGameButton.style.display = "none"
-        if(this.DesktopGameManager){this.DesktopGameManager.connectionStatus({connection: false, active: false})}
       } else {
+        if(this.DesktopGameManager){
+          this.DesktopGameManager.resumeGame()
+          this.mobileConnectionWarning.style.display = "none"
+        }
+
         this.mobileConnected = true
         this.mobileConnectedAlert.style.display = "block"
+        this.startGameButton.style.display = "block"
+
         // Checks if user is focused on mobile window
         if(!this.mobileActive){
+          if(this.DesktopGameManager){
+            this.DesktopGameManager.pauseGame()
+            this.mobileUnactiveWarning.style.display = "block"
+          }
           this.mobileUnactiveAlert.style.display = "block"
           this.startGameButton.style.display = "none"
-          if(this.DesktopGameManager){this.DesktopGameManager.connectionStatus({connection: true, active: false})}
         }else{
+          if(this.DesktopGameManager){
+            this.DesktopGameManager.resumeGame()
+            this.mobileUnactiveWarning.style.display = "none"
+          }
           this.startGameButton.style.display = "block"
           this.mobileUnactiveAlert.style.display = "none"
-          if(this.DesktopGameManager){this.DesktopGameManager.connectionStatus({connection: true, active: true})}
         }
       }
     }, 500)

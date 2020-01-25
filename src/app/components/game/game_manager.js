@@ -1,7 +1,7 @@
 class GameManager{
 
   constructor(PageManager){
-    this.PageManager = PageManager
+    this.pageManager = PageManager
     // this.gameCable = PageManager.gameCable
     console.log("New GameManager instance initiated")
   }
