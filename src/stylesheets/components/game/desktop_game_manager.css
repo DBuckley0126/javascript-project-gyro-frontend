@@ -1,3 +1,6 @@
+#app-container #desktop-game-container {
+  display: none;
+}
 #app-container #desktop-game-container #desktop-game-canvas {
   position: fixed;
   top: 0;

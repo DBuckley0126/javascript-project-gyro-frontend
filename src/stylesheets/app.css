@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css?family=ZCOOL+QingKe+HuangYou&display=swap");
 #app-container #desktop-container {
-  display: block;
+  display: none;
 }
 #app-container #desktop-container #mobile-connected-alert {
   display: none;
@@ -11,6 +11,9 @@
 #app-container #desktop-container #join-code-display {
   display: none;
 }
+#app-container #desktop-container #start-game-button {
+  display: none;
+}
 
 #app-container #mobile-container {
   display: none;
@@ -19,6 +22,13 @@
   display: none;
 }
 
+#app-container #mobile-game-container {
+  display: none;
+}
+
+#app-container #desktop-game-container {
+  display: none;
+}
 #app-container #desktop-game-container #desktop-game-canvas {
   position: fixed;
   top: 0;

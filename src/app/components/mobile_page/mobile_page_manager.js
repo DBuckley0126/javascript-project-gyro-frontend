@@ -70,22 +70,30 @@ class MobilePageManager{
   addGyroscopeListener(element){
     element.addEventListener('deviceorientation', (event,context = this) => {
       let tempX = event.gamma; // In degree in the range [-90,90]
+      let tempY = event.beta
 
       // Because we don't want to have the device upside down
       // We constrain the x value to the range [-90,90]
       if (tempX >  90) { tempX =  90};
       if (tempX < -90) { tempX = -90};
 
+      // Because we don't want to have the device upside down
+      // We constrain the y value to the range [-90,90]
+      if (tempY >  90) { tempY =  90};
+      if (tempY < -90) { tempY = -90};
+
+
       // To make computation easier we shift the range of
       tempX += 90;
 
       // Round value to nearest whole number
-      context.gyroscopeData = {x: Math.round(tempX), y: null, z: null}
+      context.gyroscopeData = {x: Math.round(tempX), y: Math.round(tempY), z: null}
 
-      context.MobileGameManager.sensorData = {x: context.gyroscopeData["x"]}
+      context.MobileGameManager.sensorData = {x: context.gyroscopeData["x"], y: context.gyroscopeData["y"]}
 
     })
   }
+
 
   //
   // ─── CREATE CABLE CONNECTION FOR CONSUMER ───────────────────────────────────────
@@ -170,8 +178,16 @@ class MobilePageManager{
   //
     
   addGryoscopeBroadcaster(element){
-    element.setInterval(()=>{this.gameCable.sensorDataRelay({action:"gyroscrope_data_push", type:"sensor_data_relay", body:{x: this.gyroscopeData.x, user_active: (this.userActive == true)}})}, 100)
-  }
+    element.setInterval(()=>{
+      this.gameCable.sensorDataRelay({
+        action:"gyroscrope_data_push", 
+        type:"sensor_data_relay", 
+        body:{
+          x: this.gyroscopeData.x, 
+          y: this.gyroscopeData.y, 
+          user_active: this.userActive == true
+        }}, 100)
+  })}
 
   //
   // ─── CONNECTION OBSERVERS ───────────────────────────────────────────────────────

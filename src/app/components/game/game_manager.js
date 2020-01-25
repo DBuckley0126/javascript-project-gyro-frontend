@@ -17,7 +17,7 @@ class GameManager{
   //
   // ─── EXTERNAL DATA INTERFACE ───────────────────────────────────────────────────────────────────────────
   //
-  set sensorData(obj){
+  sensorData(obj){
     this._axisX = obj["x"]
     this._axisY = obj["y"]
     this._axisZ = obj["z"]
@@ -32,9 +32,6 @@ class GameManager{
     return outputObject
   }
 
-  get sensorData(){
-    return {x: this._axisX, y: this._axisY, z: this._axisZ}
-  }
 
 }
 

@@ -7,15 +7,10 @@ export {AppAdapter} from './adapters/app_adapter'
 export {DesktopPageManager} from './components/desktop_page/desktop_page_manager'
 export {MobilePageManager} from './components/mobile_page/mobile_page_manager'
 export {AppManager} from './components/app_manager'
-
 export {GameManager} from './components/game/game_manager'
 export {DesktopGameManager} from './components/game/desktop_game_manager'
 export {MobileGameManager} from './components/game/mobile_game_manager'
 
-export {DemoGame} from './components/demo_game/demo_game'
-
-// IMAGES
-// import '../../assets/img/cat.png'
 
 // GENERATORS
 export {GeneralElement} from './components/game/generators/general_element'

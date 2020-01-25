@@ -4,7 +4,7 @@ import {GameManager, ParticleRockElement} from '../../../modules'
 const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Constraint = Matter.Constraint
 
 class ParticleRockDestroyPartGroup {
-  constructor(originX, originY, scale, game, timeout = true, timeoutMs = 20000, minParticles = 5, maxParticles = 10){
+  constructor(originX, originY, scale, game, timeout = true, timeoutMs = 80000, minParticles = 5, maxParticles = 10){
     this.game = game
     this.scale = scale
     this.width = 0

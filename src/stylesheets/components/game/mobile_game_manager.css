@@ -1,3 +1,5 @@
-
+#app-container #mobile-game-container {
+  display: none;
+}
 
 /*# sourceMappingURL=mobile_game_manager.css.map */

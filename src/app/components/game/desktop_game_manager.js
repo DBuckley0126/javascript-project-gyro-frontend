@@ -27,26 +27,27 @@ class DesktopGameManager extends GameManager{
     this._axisX = 0
     this._axisY = 0
     this._axisZ = 0
-    this.gunButtonPressed = false
     this.engine = null
     this.world = null
+    this.bonusScore = 0
     this.spawnerEngine = {
-      lastTimeDeconstructedAstroidGroupSpawned: Date.now() - 10000,
+      lastTimeDeconstructedAstroidGroupSpawned: Date.now() - 8000,
     }
+    this.elementVertices = elementVerticesJSON.default
     this.initElementContainers()
     this.textureContainer = {}
     this.createGameInstance()
-    this.elementVertices = elementVerticesJSON.default
   }
 
   //
   // ─── EXTERNAL DATA INTERFACE ───────────────────────────────────────────────────────────────────────────
   //
 
-  set connectionStatus(obj){
-    this.connectionStatus = obj["connected"]
+  connectionStatus(obj){
+    this.connection = obj["connection"]
     this.activeStatus = obj["active"]
   }
+
 
   //
   // ─── INSTANCE HELPER FUNCTIONS ───────────────────────────────────────────────────────────────────────────
@@ -121,7 +122,7 @@ class DesktopGameManager extends GameManager{
 
   endGame(){
 
-    this.finalScore = this.currentScore
+    this.finalScore = this.overallScore
     this.scoreDisplay.style.display = "none"
     this.endSceneScore.innerText = this.finalScore
     this.endScene.style.display = "block"
@@ -175,7 +176,7 @@ class DesktopGameManager extends GameManager{
       // this.produceDevCanvas()
       this.initIntervalCleanUp()
       this.initCollisionDetection()
-
+      this.container.style.display = "block"
     }
   }
 
@@ -213,23 +214,30 @@ class DesktopGameManager extends GameManager{
   }
 
   updateScore(){
-    this.currentScore = Math.floor( this.currentFrameCount / 10 )
-    this.scoreDisplay.innerText = this.currentScore
+    this.timeScore = Math.floor( this.currentFrameCount / 10 )
+    this.overallScore = this.timeScore + this.bonusScore
+    this.scoreDisplay.innerText = this.overallScore
   }
 
     
 
   reactToMovementControl(){
-    const startingPoint = this.currentWindowWidth / 2
-    const movementMultiplier = this._axisX * 10
-    const px = startingPoint + movementMultiplier
-    Body.setVelocity(this.spaceship.matterBody, {x: px - this.spaceship.matterBody.position.x, y: 0})
-    Body.setPosition(this.spaceship.matterBody, {x: px, y: this.spaceship.matterBody.position.y})
+    const axisMovementPercentage = this._axisX / 180
+
+    const xTargetPositionInWindow = this.currentWindowWidth * axisMovementPercentage
+    let moveX = this.spaceship.matterBody.position.x
+    if(xTargetPositionInWindow < this.spaceship.matterBody.position.x - 10){
+      moveX = this.spaceship.matterBody.position.x - 10
+    } else if (xTargetPositionInWindow > this.spaceship.matterBody.position.x + 10){
+      moveX = this.spaceship.matterBody.position.x + 10
+    }
+
+    Body.setVelocity(this.spaceship.matterBody, {x: moveX, y: + 100})
+    Body.setPosition(this.spaceship.matterBody, {x: moveX, y: this.spaceship.matterBody.position.y})
   }
 
   reactToGunControl(){
-    
-    if(this.gunButtonPressed && this.lastTimeGunFired < Date.now() - 250){
+    if(this._axisY <= 42 && this.lastTimeGunFired < Date.now() - 250 && this.spaceship.exploded === false){
       new BulletElement(this.spaceship.gunPosition["x"], this.spaceship.gunPosition["y"], 1, this)
       this.lastTimeGunFired = Date.now()
     }
@@ -237,13 +245,13 @@ class DesktopGameManager extends GameManager{
 
   initIntervalCleanUp(){
     setInterval(function(){
-      const context = this.game
+      const context = this
       let outsideWorldContainer = Matter.Query.region(Composite.allBodies(context.world), context.world.bounds, {outside: true})
       for(const matterBody of outsideWorldContainer){
         context.findBodyMatchingElement(matterBody, true)
       }
       Composite.remove(context.world, outsideWorldContainer)
-    }, 1000)
+    }.bind(this), 1000)
   }
 
   initCollisionDetection(context = this){
@@ -356,8 +364,9 @@ class DesktopGameManager extends GameManager{
     })
     if(this.spawnerEngine.lastTimeDeconstructedAstroidGroupSpawned < Date.now() - (8000 / (this.spawnerEngine.difficultyMultipler))){
       const randomX = GameManager.randomInt(leftBoundry, rightBoundry)
+      const randomScale = (GameManager.randomInt(20, 40)) / 100
       const velocityMultiplier = (this.spawnerEngine.difficultyMultipler / 2) + 1
-      new DeconstructedAstroidGroup(randomX, -200, 0.3, this, velocityMultiplier)
+      new DeconstructedAstroidGroup(randomX, -200, randomScale, this, velocityMultiplier)
       this.spawnerEngine.lastTimeDeconstructedAstroidGroupSpawned = Date.now()
     }
   }

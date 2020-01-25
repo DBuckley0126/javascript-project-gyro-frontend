@@ -1,7 +1,7 @@
 #app-container {
 
   #desktop-container{
-    display:block;
+    display:none;
   
     #mobile-connected-alert{
       display:none;
@@ -13,6 +13,10 @@
 
     #join-code-display{
       display:none;
+    }
+
+    #start-game-button{
+      display: none;
     }
   }
 

@@ -38,22 +38,77 @@ class DesktopPageManager{
     this.mobileConnectedAlert = this.container.querySelector("#mobile-connected-alert")
     this.mobileUnactiveAlert = this.container.querySelector("#mobile-unactive-alert")
     this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
+    this.startGameButton = this.container.querySelector("#start-game-button")
 
     // Initialise listeners
-    this.addGameCreateListener(this.createGameButton)
+    this.addCreateGameListener(this.createGameButton)
+    this.addStartGameListener(this.startGameButton)
 
     
     return Promise.resolve("Finished setting bindings and listeners")
   }
 
   // Listeners
-  addGameCreateListener(element){
+  addCreateGameListener(element){
     element.addEventListener("click", event => {
+      this.joinCodeDisplay.style.display = "none"
       let joinCode = Math.floor(10000 + (90000 - 10000) * Math.random());
       this.initGameSubscription(joinCode)
       this.joinCodeDisplay.innerText = joinCode
     })
   }
+
+  addStartGameListener(element){
+
+    element.addEventListener("click", event => {
+      if(this.mobileActive){
+        // Attempt fullscreen
+        const context = this
+        async function fullScreenLock(){
+          try{
+            await context.openFullscreen(context.container)
+            console.log("Fullscreen granted")
+            if(context.deviceType === "mobile"){
+              await screen.orientation.lock("portrait-primary")
+              console.log("Mobile screen orientation locked")
+            } 
+  
+          }catch(error){
+            context.failureNotice(error)
+          }
+        }
+        fullScreenLock()
+        // Start game instance
+        this.DesktopGameManager = new DesktopGameManager(this)
+        this.initMobileConnectionObserver()
+        this.startGameButton.innerText = "Play again"
+
+      } else {
+        this.alertNotice({type:"refuse_game", statusText: "Can not start game unless mobile connection active"})
+        this.startGameButton.style.display = "none"
+        this.startGameButton.innerText = "Start Game"
+      }
+    })
+  }
+
+  // Request fullscreen from browser
+  openFullscreen(element) {
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+      return Promise.resolve("Request fullscreen granted")
+    } else if (element.mozRequestFullScreen) { /* Firefox */
+      element.mozRequestFullScreen();
+      return Promise.resolve("Request fullscreen granted")
+    } else if (element.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+      element.webkitRequestFullscreen();
+      return Promise.resolve("Request fullscreen granted")
+    } else if (element.msRequestFullscreen) { /* IE/Edge */
+      element.msRequestFullscreen();
+      return Promise.resolve("Request fullscreen granted")
+    } else {
+      return Promise.reject("Request fullscreen denied")
+    }
+  }  
 
 
   // Create cable connection for consumer(Unique user)
@@ -94,6 +149,7 @@ class DesktopPageManager{
       },
       rejected: function(data){
         let error = {type:"connection_rejected", statusText: `Failed to create game for join code ${joinCode}`}
+        this.joinCodeDisplay.style.display = "none"
         context.failureNotice(error)
       }
     })
@@ -110,11 +166,11 @@ class DesktopPageManager{
         switch(data["action"]){
           case "game_join_success":
             console.log("mobile joined success")
-            this.initMobileConnectionObserver()
-            this.DesktopGameManager = new DesktopGameManager(this)
+            this.startGameButton.style.display = "block"
             break
           case "game_create_success":
-            console.log("game create seccess")
+            console.log("game create success")
+            this.createGameButton.innerText = "Remake new game"
             this.joinCodeDisplay.style.display = "block"
             this.initDesktopPingLoop()
             break  
@@ -129,7 +185,7 @@ class DesktopPageManager{
     this.lastPingFromMobile = Date.now()
     this.mobileActive = data["body"]["user_active"]
     console.log(data["body"])
-    this.DesktopGameManager.sensorData = {x: data["body"]["x"]}
+    if(this.DesktopGameManager){this.DesktopGameManager.sensorData({x: data["body"]["x"], y: data["body"]["y"]})}else{console.log("Can not send sensorData as no game inisialised")}
   }
 
   // User notices/warnings
@@ -155,17 +211,20 @@ class DesktopPageManager{
       if(this.lastPingFromMobile < Date.now()-1500){
         this.mobileConnected = false
         this.mobileConnectedAlert.style.display = "none"
-        this.DesktopGameManager.connectionStatus = {connection: false, active: false}
+        this.startGameButton.stye.display = "none"
+        this.DesktopGameManager.connectionStatus({connection: false, active: false})
       } else {
         this.mobileConnected = true
         this.mobileConnectedAlert.style.display = "block"
         // Checks if user is focused on mobile window
         if(!this.mobileActive){
           this.mobileUnactiveAlert.style.display = "block"
-          this.DesktopGameManager.connectionStatus = {connection: true, active: false}
+          this.startGameButton.stye.display = "none"
+          this.DesktopGameManager.connectionStatus({connection: true, active: false})
         }else{
+          this.startGameButton.stye.display = "block"
           this.mobileUnactiveAlert.style.display = "none"
-          this.DesktopGameManager.connectionStatus = {connection: true, active: true}
+          this.DesktopGameManager.connectionStatus({connection: true, active: true})
         }
       }
     }, 500)

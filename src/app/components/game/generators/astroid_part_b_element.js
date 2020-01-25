@@ -46,6 +46,7 @@ class AstroidPartBElement extends GeneralElement {
       if(this.health <= 0){
         const matterBodyX = this.matterBody.position.x
         const matterBodyY = this.matterBody.position.y
+        this.game.bonusScore += 100
         this.remove()
         new ParticleRockDestroyPartGroup(matterBodyX, matterBodyY, this.scale, this.game)
       }
