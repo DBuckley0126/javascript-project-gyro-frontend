@@ -14,7 +14,11 @@ class BulletElement extends GeneralElement {
     this.moveY = 0
 
     this.options = {
+      density: 0.002,
       frictionAir: 0,
+      friction: 1,
+      frictionStatic: 1,
+      restitution: 0.2,
       label: "bulletElement"
     }
     this.texture = this.game.textureContainer["bulletImg"]

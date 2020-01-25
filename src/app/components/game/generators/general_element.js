@@ -32,11 +32,11 @@ class GeneralElement {
     if(this.container){
       Composite.remove(this.game.world, this.matterBody)
       const removedElementsArray = this.container.splice(this.index, 1)
-      console.log("Removed " + removedElementsArray[0].constructor.name + " from container")
+      if(this.constraintArray){this.removeAllConstraints()}
       return removedElementsArray[0]
     } else {
+      console.log("removed")
       Composite.remove(this.game.world, this.matterBody)
-      console.log("Removed from world but not from container array")
       return this
     }
   }

@@ -45,7 +45,18 @@ module.exports = {
           outputPath: 'assets/img'
         }
       },
-
+      {
+        test: /\.(ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'assets/fonts'
+            }
+          }
+        ]
+      }
     ]
   },
 };

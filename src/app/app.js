@@ -3,23 +3,11 @@
 
 import {AppManager, MobileGameManager, DesktopGameManager} from './modules'
 import '../stylesheets/app.css'
-// import Matter from 'matter-js'
-
-// import catImgURL from '../../assets/img/cat.png'
-// import * as pixiTestJSON from '../../assets/img/pixi_test.json'
-// import pixiTestPNG from '../../assets/img/pixi_test.png'
-// import * as p5 from '../.././node_modules/p5/lib/p5.js'
-// import * as p5 from 'p5'
 
 
-// function randomInt(min, max) {
-//   return Math.floor(Math.random() * (max - min + 1)) + min;
-// }
-
-  // // module aliases
-  // const Engine = Matter.Engine,
-  // World = Matter.World,
-  // Bodies = Matter.Bodies;
+import Matter, { Query } from 'matter-js'
+import * as p5 from 'p5'
+const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Composite = Matter.Composite, Events = Matter.Events
 
 
 

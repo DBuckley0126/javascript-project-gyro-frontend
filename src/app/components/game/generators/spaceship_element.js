@@ -11,6 +11,7 @@ class SpaceshipElement extends GeneralElement {
     this.height = this.game.elementVertices.spaceship.size.height
     this.moveX = -20
     this.moveY = -100
+    this.exploded = false
 
     this.options = {
       isStatic: true,
@@ -29,7 +30,7 @@ class SpaceshipElement extends GeneralElement {
   }
 
   get gunPosition(){
-    return {x: (this.artificalMassCenter["x"])+(0 * this.scale), y: (this.artificalMassCenter["y"])+(-150 * this.scale)}
+    return {x: (this.artificalMassCenter["x"])+(0 * this.scale), y: (this.artificalMassCenter["y"])+(-110 * this.scale)}
   }
 }
 

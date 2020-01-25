@@ -4,7 +4,7 @@ import {GameManager, AstroidPartCElement, AstroidPartBElement, AstroidPartAEleme
 const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Constraint = Matter.Constraint
 
 class DeconstructedAstroidGroup {
-  constructor(originX, originY, scale, game){
+  constructor(originX, originY, scale, game, velocityMultipler = 1){
     this.game = game
     this.scale = scale
     this.width = 0
@@ -13,6 +13,7 @@ class DeconstructedAstroidGroup {
     this.originY = originY
     this.stiffness = 0.05
     this.damping = 0.01
+    this.velocityMultipler = velocityMultipler
 
     this.options = {
       frictionAir: 0,
@@ -22,12 +23,17 @@ class DeconstructedAstroidGroup {
 
     this.initAstroidParts()
     this.initConstraints()
+    this.initVelocity()
   }
 
   initAstroidParts(){
     this.astroidPartAElement = new AstroidPartAElement(this.originX + (22 * this.scale), this.originY + (-138 * this.scale), this.scale, this.game)
     this.astroidPartBElement = new AstroidPartBElement(this.originX + (97 * this.scale), this.originY + (94 * this.scale), this.scale, this.game)
     this.astroidPartCElement = new AstroidPartCElement(this.originX + (-145 * this.scale), this.originY + (34 * this.scale), this.scale, this.game)
+    
+    this.astroidPartAElement.completePartArray = [this.astroidPartAElement, this.astroidPartBElement, this.astroidPartCElement]
+    this.astroidPartBElement.completePartArray = [this.astroidPartAElement, this.astroidPartBElement, this.astroidPartCElement]
+    this.astroidPartCElement.completePartArray = [this.astroidPartAElement, this.astroidPartBElement, this.astroidPartCElement]
   }
 
   initConstraints(){
@@ -64,6 +70,13 @@ class DeconstructedAstroidGroup {
     this.astroidPartCElement.constraintArray = [this.constraintAB, this.constraintBC, this.constraintCA]
     
     World.add(this.game.world, [this.constraintAB, this.constraintBC, this.constraintCA])
+  }
+
+  initVelocity(){
+    const randomX = (GameManager.randomInt(-10,90)) / 100
+    Body.setVelocity(this.astroidPartAElement.matterBody, {x:randomX, y: (1 * this.velocityMultipler)})
+    Body.setVelocity(this.astroidPartBElement.matterBody, {x:randomX, y: (1 * this.velocityMultipler)})
+    Body.setVelocity(this.astroidPartCElement.matterBody, {x:randomX, y: (1 * this.velocityMultipler)})
   }
 
 }

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=ZCOOL+QingKe+HuangYou&display=swap");
 #app-container #desktop-container {
   display: block;
 }
@@ -29,12 +30,37 @@
   left: 0;
 }
 #app-container #desktop-game-container #desktop-game-score-display {
+  display: none;
   position: relative;
-  top: 20vh;
-  left: 40vw;
+  top: 86vh;
+  left: 50vw;
   width: 100px;
   height: 50px;
-  background-color: red;
+  font-size: 60px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  color: silver;
+}
+#app-container #desktop-game-container #desktop-game-end-scene {
+  display: none;
+  position: relative;
+  top: 50vh;
+  left: 50vw;
+  width: 300px;
+  height: 100px;
+  border-radius: 10px;
+  border-color: #272727;
+  background: #686868;
+  border-width: 5px;
+  font-size: 60px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  color: black;
+}
+#app-container #desktop-game-container #desktop-game-end-scene p {
+  font-size: 60px;
+  font-size: 30px;
+  height: 30px;
+  padding-left: 10vw;
+  margin: 0;
 }
 
 /*# sourceMappingURL=app.css.map */

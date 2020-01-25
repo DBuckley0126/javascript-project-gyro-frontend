@@ -12,13 +12,41 @@
       left: 0;
     }
     #desktop-game-score-display{
+      display: none;
       position: relative;
-      top: 20vh;
-      left: 40vw;
+      top: 86vh;
+      left: 50vw;
       width: 100px;
       height: 50px;
-      background-color: red;
+      font-size: 60px;
+      font-family: 'ZCOOL QingKe HuangYou', cursive;
+      color: silver;
     }
+
+    #desktop-game-end-scene{
+      display: none;
+      position: relative;
+      top: 50vh;
+      left: 50vw;
+      width: 300px;
+      height: 100px;
+      border-radius: 10px;
+      border-color: rgb(39, 39, 39);
+      background: rgb(104, 104, 104);
+      border-width: 5px;
+      font-size: 60px;
+      font-family: 'ZCOOL QingKe HuangYou', cursive;
+      color: rgb(0, 0, 0);
+
+      p{
+        font-size: 60px;
+        font-size: 30px;
+        height: 30px;
+        padding-left: 10vw;
+        margin: 0;
+      }
+    }
+
   }
 
 }

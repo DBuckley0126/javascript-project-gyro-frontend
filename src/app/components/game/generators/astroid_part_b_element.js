@@ -11,13 +11,17 @@ class AstroidPartBElement extends GeneralElement {
     this.moveX = 10
     this.moveY = -2
     this.constraintArray = []
+    this.completePartArray = []
     this.lastTimeHit = 0
-    this.health = 10
+    this.health = 5
+    this.exploded = false
 
     this.options = {
       frictionAir: 0,
-      label: "astroidPartBElement",
-      setStatic: true
+      friction: 0,
+      frictionStatic: 0.2,
+      restitution: 0.2,
+      label: "astroidPartBElement"
     }
     this.verticesHash = Vertices.fromPath(GameManager.removeBrackets(this.game.elementVertices.astroidPartB.fixtures[0].hullPolygon))
     this.texture = this.game.textureContainer["astroidPartBImg"]
@@ -30,17 +34,14 @@ class AstroidPartBElement extends GeneralElement {
     this.matterBody = Bodies.fromVertices(x, y, this.verticesHash, this.options)
     Body.scale(this.matterBody, this.scale, this.scale, this.artificalMassCenter)
     World.add(this.game.world, this.matterBody)
-    Body.setVelocity(this.matterBody, {x:0, y: 0})
   }
 
   minusHealth(amount = 1){
     if(this.lastTimeHit < Date.now()-100){
       this.health = this.health - amount
-      console.log(`Minus ${amount} health from astroid part`)
-      console.log(this)
       this.lastTimeHit = Date.now()
-      if(this.health <= 7){
-        if(this.constraintArray.length !== 0){this.removeAllConstraints()}
+      if(this.health <= 3){
+        if(this.constraintArray.length !== 0){this.explode()}
       }
       if(this.health <= 0){
         const matterBodyX = this.matterBody.position.x
@@ -51,8 +52,18 @@ class AstroidPartBElement extends GeneralElement {
     }
   }
 
+  explode(){
+    for(const astroidPartElement of this.completePartArray){
+      astroidPartElement.removeAllConstraints()
+      astroidPartElement.health = 3
+      astroidPartElement.exploded = true
+
+    }
+  }
+
   removeAllConstraints(){
     World.remove(this.game.world, this.constraintArray)
+    this.constraintArray = []
   }
 
 }
