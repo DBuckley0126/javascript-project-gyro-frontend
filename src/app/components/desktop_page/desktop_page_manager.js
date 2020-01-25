@@ -39,10 +39,12 @@ class DesktopPageManager{
     this.mobileUnactiveAlert = this.container.querySelector("#mobile-unactive-alert")
     this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
     this.startGameButton = this.container.querySelector("#start-game-button")
+    this.cancelGameButton = this.container.querySelector("#desktop-game-cancel-button")
 
     // Initialise listeners
     this.addCreateGameListener(this.createGameButton)
     this.addStartGameListener(this.startGameButton)
+    this.addCancelGameListener(this.cancelGameButton)
 
     
     return Promise.resolve("Finished setting bindings and listeners")
@@ -51,10 +53,12 @@ class DesktopPageManager{
   // Listeners
   addCreateGameListener(element){
     element.addEventListener("click", event => {
+      if(this.gameCable){this.gameCable.unsubscribed({action:"desktop_unsubscribe_check", type:"unsubscribed", body: {device: "desktop"}})}
       this.joinCodeDisplay.style.display = "none"
+      this.cancelGameButton.style.display = "none"
       let joinCode = Math.floor(10000 + (90000 - 10000) * Math.random());
       this.initGameSubscription(joinCode)
-      this.joinCodeDisplay.innerText = joinCode
+      this.joinCodeDisplay.innerText = `Game Join Code: ${joinCode}`
     })
   }
 
@@ -80,14 +84,19 @@ class DesktopPageManager{
         fullScreenLock()
         // Start game instance
         this.DesktopGameManager = new DesktopGameManager(this)
-        this.initMobileConnectionObserver()
         this.startGameButton.innerText = "Play again"
 
       } else {
-        this.alertNotice({type:"refuse_game", statusText: "Can not start game unless mobile connection active"})
+        this.alertNotice({type:"refuse_game", statusText: "WARNING: Can not start game unless mobile connection active"})
         this.startGameButton.style.display = "none"
         this.startGameButton.innerText = "Start Game"
       }
+    })
+  }
+
+  addCancelGameListener(element){
+    element.addEventListener("click", event => {
+      this.gameCable.cancelGame({action:"desktop_canceled_game", type:"cancel_game", body: {device: "desktop"}})
     })
   }
 
@@ -124,7 +133,7 @@ class DesktopPageManager{
     let adapter = CableAdapter.instance
     if(adapter){
       this.adapter = adapter
-      return Promise.resolve("Finished setting bindings and Listeners")
+      return Promise.resolve("Finished attaching action cable adapter")
     } else {
       return Promise.reject("Failed to create Adapter")
     }
@@ -138,19 +147,24 @@ class DesktopPageManager{
         context.cableDataHandler(data)
       },
       desktopPing: function(payload){
-        console.log("Desktop ping sent")
         this.perform('desktop_ping', payload)
-      },
-      sendMessage: function(payload){
-
       },
       sensorDataRelay: function(payload){
         this.perform('sensor_data_relay', payload)
       },
       rejected: function(data){
         let error = {type:"connection_rejected", statusText: `Failed to create game for join code ${joinCode}`}
+        clearInterval(this.desktopPingIntervalID)
+        clearInterval(this.obileConnectionObserverIntervalID)
         this.joinCodeDisplay.style.display = "none"
         context.failureNotice(error)
+      },
+      cancelGame: function(payload){
+        this.perform('cancel_game', payload)
+      },
+      unsubscribed: function(payload){
+        this.perform('unsubscribed', payload)
+        this.unsubscribe()
       }
     })
   }
@@ -172,11 +186,28 @@ class DesktopPageManager{
             console.log("game create success")
             this.createGameButton.innerText = "Remake new game"
             this.joinCodeDisplay.style.display = "block"
+            this.cancelGameButton.style.display = "block"
             this.initDesktopPingLoop()
+            this.initMobileConnectionObserver()
             break  
         }
         this.alertNotice({type:"connection_success", statusText: data["body"]["message"]})
         break
+      case "cancel_game":
+        this.cancelGame(data)
+        break
+      case "unsubscribed":
+        let device = null
+        if(data["mobile"]){
+          device = "Mobile"
+        }else{
+          device = "desktop"
+        }
+        console.log(`${device} has unsubscribed from game channel ${data["channel"]}`)
+        if(data["mobile"] == true){
+          if(this.gameCable){this.gameCable.cancelGame({action:"desktop_canceled_game_from_mobile_unsubscribe", type:"cancel_game", body: {device: "desktop"}})}
+        }
+        break      
     }
   }
 
@@ -185,7 +216,20 @@ class DesktopPageManager{
     this.lastPingFromMobile = Date.now()
     this.mobileActive = data["body"]["user_active"]
     console.log(data["body"])
-    if(this.DesktopGameManager){this.DesktopGameManager.sensorData({x: data["body"]["x"], y: data["body"]["y"]})}else{console.log("Can not send sensorData as no game inisialised")}
+    if(this.DesktopGameManager){this.DesktopGameManager.sensorData({x: data["body"]["x"], y: data["body"]["y"]})}else{console.log("WARNING: Can not set sensorData as no game inisialised")}
+  }
+
+  cancelGame(data){
+    if(this.gameCable){this.gameCable.unsubscribed({action:"desktop_unsubscribe", type:"unsubscribed", body: {device: "desktop"}})}
+    clearInterval(this.desktopPingIntervalID)
+    clearInterval(this.mobileConnectionObserverIntervalID)
+    this.mobileConnected = false
+    this.mobileConnectedAlert.style.display = "none"
+    this.startGameButton.style.display = "none"
+    this.cancelGameButton.style.display = "none"
+    this.joinCodeDisplay.style.display = "none"
+    this.createGameButton.innerText = "Create New Game"
+    this.alertNotice({type:"cancel_game", statusText: `${data["body"]["device"]} has canceled the game`})
   }
 
   // User notices/warnings
@@ -195,36 +239,43 @@ class DesktopPageManager{
   }
 
   alertNotice(notice = {type:"undefiend", statusText: "Failure Unknown"}){
-    console.log(notice)
+    clearTimeout(this.alertTimeoutID)
+    this.alert.style.display = "block"
     this.alert.innerHTML = notice.statusText
+    console.log(notice)
+    this.alertTimeoutID = setTimeout(function(){
+      this.alert.innerHTML = ""
+      this.alert.style.display = "none"
+    }.bind(this), 4000)
+
   }
 
   // Broadcasters
   initDesktopPingLoop(){
-    setInterval(()=>{this.gameCable.desktopPing({action:"desktop_connection_ping", type:"desktop_ping", body:{active: true}})}, 1000)
+    this.desktopPingIntervalID = setInterval(()=>{this.gameCable.desktopPing({action:"desktop_connection_ping", type:"desktop_ping", body:{active: true}})}, 1000)
   }
 
   // Connection Observers
   initMobileConnectionObserver(){
-    setInterval(()=>{
+    this.mobileConnectionObserverIntervalID = setInterval(()=>{
       // checks if mobile is connected
       if(this.lastPingFromMobile < Date.now()-1500){
         this.mobileConnected = false
         this.mobileConnectedAlert.style.display = "none"
-        this.startGameButton.stye.display = "none"
-        this.DesktopGameManager.connectionStatus({connection: false, active: false})
+        this.startGameButton.style.display = "none"
+        if(this.DesktopGameManager){this.DesktopGameManager.connectionStatus({connection: false, active: false})}
       } else {
         this.mobileConnected = true
         this.mobileConnectedAlert.style.display = "block"
         // Checks if user is focused on mobile window
         if(!this.mobileActive){
           this.mobileUnactiveAlert.style.display = "block"
-          this.startGameButton.stye.display = "none"
-          this.DesktopGameManager.connectionStatus({connection: true, active: false})
+          this.startGameButton.style.display = "none"
+          if(this.DesktopGameManager){this.DesktopGameManager.connectionStatus({connection: true, active: false})}
         }else{
-          this.startGameButton.stye.display = "block"
+          this.startGameButton.style.display = "block"
           this.mobileUnactiveAlert.style.display = "none"
-          this.DesktopGameManager.connectionStatus({connection: true, active: true})
+          if(this.DesktopGameManager){this.DesktopGameManager.connectionStatus({connection: true, active: true})}
         }
       }
     }, 500)

@@ -14,11 +14,17 @@
 #app-container #desktop-container #start-game-button {
   display: none;
 }
+#app-container #desktop-container #desktop-game-cancel-button {
+  display: none;
+}
 
 #app-container #mobile-container {
   display: none;
 }
 #app-container #mobile-container #desktop-disconnected-alert {
+  display: none;
+}
+#app-container #mobile-container #mobile-game-cancel-button {
   display: none;
 }
 

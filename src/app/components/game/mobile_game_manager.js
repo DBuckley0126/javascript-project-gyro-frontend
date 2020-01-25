@@ -14,7 +14,7 @@ import astroidPartBImgURL from '../../../../assets/img/astroid-part-b.png'
 import astroidPartCImgURL from '../../../../assets/img/astroid-part-c.png'
 import particleRockImgURL from '../../../../assets/img/particle-rock.png'
 
-// module aliases
+// MODULE ALIASES
 const Engine = Matter.Engine, World = Matter.World, Bodies = Matter.Bodies, Render = Matter.Render, Vertices = Matter.Vertices, Body = Matter.Body, Composite = Matter.Composite, Events = Matter.Events
 
 class MobileGameManager extends GameManager{
@@ -22,25 +22,31 @@ class MobileGameManager extends GameManager{
   constructor(PageManager){
     super(PageManager)
     this.initBindingsAndEventListeners()
+    this.currentWindowWidth = window.innerWidth
+    this.currentWindowHight = window.innerHeight
     this._axisX = 0
     this._axisY = 0
     this._axisZ = 0
-    this.gunButtonPressed = false
     this.engine = null
     this.world = null
+    this.spawnerEngine = {
+      lastTimeDeconstructedAstroidGroupSpawned: Date.now() - 8000,
+    }
+    this.elementVertices = elementVerticesJSON.default
     this.initElementContainers()
     this.textureContainer = {}
     this.createGameInstance()
-    this.elementVertices = elementVerticesJSON.default
   }
 
   //
   // ─── EXTERNAL DATA INTERFACE ───────────────────────────────────────────────────────────────────────────
   //
 
-  set connectionStatus(obj){
-    this.connectionStatus = obj["connected"]
+  connectionStatus(obj){
+    this.connection = obj["connection"]
+    this.activeStatus = obj["active"]
   }
+
 
   //
   // ─── INSTANCE HELPER FUNCTIONS ───────────────────────────────────────────────────────────────────────────
@@ -48,12 +54,41 @@ class MobileGameManager extends GameManager{
 
   initBindingsAndEventListeners(){
     // Set AppManagers attributes to HTML elements
-    this.container = document.querySelector("#mobile-game-container")
-    this.scoreDisplay = this.container.querySelector("#mobile-game-score-display")
+    this.container = document.querySelector("#desktop-game-container")
+    this.scoreDisplay = this.container.querySelector("#desktop-game-score-display")
+    this.endScene = this.container.querySelector("#desktop-game-end-scene")
+    this.endSceneScore = this.container.querySelector("#desktop-game-end-scene-score")
+    this.exitGameButton = this.container.querySelector("#desktop-game-end-scene-exit-button")
+    
     
     // Initialise listeners
+    this.initWindowResizeListener()
+    this.initExitButtonListener()
     
     return Promise.resolve("Finished setting bindings and listeners")
+  }
+
+  initExitButtonListener(){
+    this.exitGameButton.addEventListener('click', function(){
+      this.destroyAndHideGame()
+    }.bind(this))
+  }
+
+  initWindowResizeListener(){
+    window.addEventListener("resize", function(event){
+      console.log("resize window active")
+      this.currentWindowWidth = window.innerWidth
+      this.currentWindowHight = window.innerHeight
+      this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
+      this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 200}}
+    }.bind(this))
+  }
+
+  destroyAndHideGame(){
+    Engine.clear(this.engine)
+    this.sketch.remove()
+    this.endScene.style.display = "none"
+    this.container.style.display = "none"
   }
 
   findBodyMatchingElement(matterBody, remove = false){
@@ -84,13 +119,22 @@ class MobileGameManager extends GameManager{
     this.particleRockElementContainer = []
   }
 
+  endGame(){
+
+    this.finalScore = this.overallScore
+    this.scoreDisplay.style.display = "none"
+    this.endSceneScore.innerText = this.finalScore
+    this.endScene.style.display = "block"
+    console.log("game ended")
+  }
+
 
   //
   // ─── MATTER + P5 ───────────────────────────────────────────────────────────────────────────
   //
 
   createGameInstance(){
-    this.P5engine = new p5((sketch) => {this.initSketchInstance(sketch)}, this.container.querySelector('#mobile-game-canvas'))
+    this.P5engine = new p5((sketch) => {this.initSketchInstance(sketch)}, this.container.querySelector('#desktop-game-canvas'))
   }
 
   initSketchInstance(sketch){
@@ -122,31 +166,32 @@ class MobileGameManager extends GameManager{
       this.engine = Engine.create({constraintIterations: 4})
       this.world = this.engine.world
       this.world.gravity.y = 0
-      this.world.bounds = {min:{x: -500 ,y: -500}, max: {x: window.innerWidth + 500, y: window.innerHeight + 500}}
-      this.spaceship = new SpaceshipElement(500, 800, 0.5, this)
+      this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 400}}
+      this.spaceship = new SpaceshipElement(this.currentWindowWidth / 2, this.currentWindowHight - 110, 0.5, this)
       this.lastTimeGunFired = 0
+      this.scoreDisplay.style.display = "block"
 
-      this.deconstructedAstroidGroup = new DeconstructedAstroidGroup(500, 200, 0.3, this)
-
-      this.produceDevCanvas()
+      // Unhighlight below to activate Matter.js developer canvas
+      // this.produceDevCanvas()
       this.initIntervalCleanUp()
       this.initCollisionDetection()
-
+      this.container.style.display = "block"
     }
   }
 
   draw(){
     this.sketch.draw = () =>{
       Engine.update(this.engine)
+      this.currentFrameCount = this.sketch.frameCount
       this.sketch.push()
-      this.sketch.background(51)
-      this.showScore()
+      this.sketch.background('#141414')
       this.sketch.pop()
       this.showElements()
+      this.updateScore()
+      this.spawnerEngineUpdate()
 
       this.reactToMovementControl()
       this.reactToGunControl()
-
     }
   }
 
@@ -156,7 +201,7 @@ class MobileGameManager extends GameManager{
 
   showElements(){
     const elementArray = ['bulletElement', 'completeAstroidElement', 'astroidPartAElement', 'astroidPartBElement', 'astroidPartCElement', 'particleRockElement']
-    this.spaceship.show()
+    if(this.spaceship.exploded == false){this.spaceship.show()}
     
     // loops over containers listed in elementArray
     for(const elementName of elementArray){
@@ -167,24 +212,31 @@ class MobileGameManager extends GameManager{
     }
   }
 
-  showScore(){
-    let currentFrameCount = this.sketch.frameCount
-
+  updateScore(){
+    this.timeScore = Math.floor( this.currentFrameCount / 10 )
+    this.overallScore = this.timeScore + this.bonusScore
+    this.scoreDisplay.innerText = this.overallScore
   }
 
     
 
   reactToMovementControl(){
-    const startingPoint = 500
-    const movementMultiplier = this._axisX * 10
-    const px = startingPoint + movementMultiplier
-    Body.setVelocity(this.spaceship.matterBody, {x: px - this.spaceship.matterBody.position.x, y: 0})
-    Body.setPosition(this.spaceship.matterBody, {x: px, y: this.spaceship.matterBody.position.y})
+    const axisMovementPercentage = this._axisX / 180
+
+    const xTargetPositionInWindow = this.currentWindowWidth * axisMovementPercentage
+    let moveX = this.spaceship.matterBody.position.x
+    if(xTargetPositionInWindow < this.spaceship.matterBody.position.x - 10){
+      moveX = this.spaceship.matterBody.position.x - 10
+    } else if (xTargetPositionInWindow > this.spaceship.matterBody.position.x + 10){
+      moveX = this.spaceship.matterBody.position.x + 10
+    }
+
+    Body.setVelocity(this.spaceship.matterBody, {x: moveX, y: + 100})
+    Body.setPosition(this.spaceship.matterBody, {x: moveX, y: this.spaceship.matterBody.position.y})
   }
 
   reactToGunControl(){
-    
-    if(this.gunButtonPressed && this.lastTimeGunFired < Date.now() - 500){
+    if(this._axisY <= 42 && this.lastTimeGunFired < Date.now() - 250 && this.spaceship.exploded === false){
       new BulletElement(this.spaceship.gunPosition["x"], this.spaceship.gunPosition["y"], 1, this)
       this.lastTimeGunFired = Date.now()
     }
@@ -192,13 +244,13 @@ class MobileGameManager extends GameManager{
 
   initIntervalCleanUp(){
     setInterval(function(){
-      const context = this.game
+      const context = this
       let outsideWorldContainer = Matter.Query.region(Composite.allBodies(context.world), context.world.bounds, {outside: true})
       for(const matterBody of outsideWorldContainer){
         context.findBodyMatchingElement(matterBody, true)
       }
       Composite.remove(context.world, outsideWorldContainer)
-    }, 1000)
+    }.bind(this), 1000)
   }
 
   initCollisionDetection(context = this){
@@ -207,6 +259,12 @@ class MobileGameManager extends GameManager{
 
 
       for( const pair of pairsArray ){
+        // Checks if spaceship has been hit by astroid part A/B/C
+        if(context.collisionSpaceshipAndAstroidPart(pair)){
+          context.spaceship.remove()
+          context.spaceship.exploded = true
+          context.endGame()
+        }
         // Checks if pair contains a matterBody for a astroid part A/B/C and bullet, returns matterBody of astroid part or false
         const matterBodyForAstroidPart = context.collisionBulletAndAstroidPart(pair)
         // Checks if pair contains a matterBody for a  bullet, returns matterBody of bullet or false
@@ -226,7 +284,6 @@ class MobileGameManager extends GameManager{
           new ParticleRockDestroyPartGroup(matterBodyPositionX, matterBodyPositionY, 0.1, context, true, 1000, 2, 5)
         }
       }
-
     })
   }
 
@@ -255,6 +312,28 @@ class MobileGameManager extends GameManager{
       return false
     }
   }
+
+    // Checks if pair contains a matterBody for a astroid part A/B/C and spaceship
+    collisionSpaceshipAndAstroidPart(pair){
+      let pairContainsSpaceship = false
+      let astroidPartMatterBody = null
+      //Checks if pair contains a matterBody for a astroid part A/B/C
+      if(pair.bodyA.label === "astroidPartAElement" || pair.bodyA.label ===  "astroidPartBElement" || pair.bodyA.label === "astroidPartCElement"){
+        astroidPartMatterBody = pair.bodyA
+      } else if(pair.bodyB.label === "astroidPartAElement" || pair.bodyB.label === "astroidPartBElement" || pair.bodyB.label === "astroidPartCElement"){
+        astroidPartMatterBody = pair.bodyB
+      }
+      // Checks if pair contains a matterBody for a bulletElement
+      if(pair.bodyA.label == "spaceshipElement" || pair.bodyB.label == "spaceshipElement"){
+        pairContainsSpaceship = true
+      }
+      // If pair contains spaceship and Astroid part, return the body of astroid part
+      if(astroidPartMatterBody && pairContainsSpaceship){
+        return astroidPartMatterBody
+      } else {
+        return false
+      }
+    }
   
   // Checks if pair contains a matterBody for a bullet
   collisonBullet(pair){
@@ -276,16 +355,19 @@ class MobileGameManager extends GameManager{
   // ─── SPAWNER ENGINE ───────────────────────────────────────────────────────────────────────────
   //
 
-  initSpawnerEngine(){
-
-  }
-
-  randomBoxDrop(ms){
-    setInterval((context = this)=>{
-      const x = GameManager.randomInt(100,900)
-      const y = 100
-      const particleRockElement = new ParticleRockDestroyPartGroup(x, y, 0.5, context)
-    }, ms)
+  spawnerEngineUpdate(){
+    const leftBoundry = 0
+    const rightBoundry = this.currentWindowWidth
+    Object.assign(this.spawnerEngine, {
+      difficultyMultipler: 1 * (this.currentFrameCount / 2000) + 1
+    })
+    if(this.spawnerEngine.lastTimeDeconstructedAstroidGroupSpawned < Date.now() - (8000 / (this.spawnerEngine.difficultyMultipler))){
+      const randomX = GameManager.randomInt(leftBoundry, rightBoundry)
+      const randomScale = (GameManager.randomInt(20, 40)) / 100
+      const velocityMultiplier = (this.spawnerEngine.difficultyMultipler / 2) + 1
+      new DeconstructedAstroidGroup(randomX, -200, randomScale, this, velocityMultiplier)
+      this.spawnerEngine.lastTimeDeconstructedAstroidGroupSpawned = Date.now()
+    }
   }
 
   //
@@ -294,11 +376,11 @@ class MobileGameManager extends GameManager{
 
   produceDevCanvas(){
     this.render = Render.create({
-      element: this.container.querySelector("#mobile-game-canvas"),
+      element: this.container.querySelector("#desktop-matter-developer-canvas"),
       engine: this.engine,
       options: {
-          width: window.innerWidth,
-          height: window.innerHeight,
+          width: this.currentWindowWidth,
+          height: this.currentWindowHight,
           pixelRatio: 1,
           background: 'transparent',
           wireframeBackground: 'transparent',
