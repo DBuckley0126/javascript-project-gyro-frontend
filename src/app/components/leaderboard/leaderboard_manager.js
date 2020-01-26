@@ -17,6 +17,7 @@ class LeaderboardManager{
   addUpdateLeaderboardListener(element){
     element.addEventListener('click', function(){
       this.fetchAndLoadAllData()
+      // this.sendScoreLeaderboard("blah", 2013)
     }.bind(this))
   }
 
@@ -45,30 +46,30 @@ class LeaderboardManager{
     this.currentPlayerResultContainer.style.display = "block"
   }
 
-  // sendScoreLeaderboard(nickname, finalScore){
-  //   let configurationObject = {
-  //     method: "POST",
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json'
-  //     },
-  //     body: JSON.stringify({
-  //       nickname: nickname,
-  //       score: finalScore 
-  //     })
-  //   }
-  //   async function send(context) {
+  sendScoreLeaderboard(nickname, finalScore){
+    let configurationObject = {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        nickname: nickname,
+        score: finalScore 
+      })
+    }
+    async function send(context) {
  
-  //     let res = await fetch(context.pageManager.appURL + `/leaderboard`, configurationObject)
-  //     context.pageManager.checkRes(res)
-  //     let json = await res.json()
-  //     let returnedCurrentScore = json.data
-  //     context.updateCurrentScore(returnedCurrentScore)
+      let res = await fetch(context.pageManager.appURL + `/leaderboard`, configurationObject)
+      context.pageManager.checkRes(res)
+      let json = await res.json()
+      let returnedCurrentScore = json.data
+      context.updateCurrentScore(returnedCurrentScore)
 
-  //   }
+    }
 
-  //   send(this)
-  // }
+    send(this)
+  }
 
   
   async fetchAndLoadAllData() {

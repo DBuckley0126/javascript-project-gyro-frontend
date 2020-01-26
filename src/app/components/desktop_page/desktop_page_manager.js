@@ -72,7 +72,8 @@ class DesktopPageManager{
       this.joinCodeDisplay.style.display = "none"
       this.cancelGameButton.style.display = "none"
       let joinCode = Math.floor(10000 + (90000 - 10000) * Math.random());
-      this.initGameSubscription(joinCode)
+      setTimeout(this.initGameSubscription(joinCode), 500)
+      
       this.joinCodeDisplay.innerText = `Game Join Code: ${joinCode}`
     })
   }

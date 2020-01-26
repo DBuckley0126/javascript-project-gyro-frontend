@@ -163,6 +163,7 @@ class MobileGameManager extends GameManager{
     
   addGryoscopeBroadcaster(element){
     this.pageManager.gryoscropeBroadcasterIntervalID = element.setInterval(()=>{
+      console.log("sensor sent")
       this.pageManager.gameCable.sensorDataRelay({
         action:"gyroscrope_data_push", 
         type:"sensor_data_relay", 
@@ -170,8 +171,8 @@ class MobileGameManager extends GameManager{
           x: this._axisX,
           y: this._axisY,
           user_active: this.pageManager.userActive == true
-        }}, 100)
-  })}
+        }})
+  }, 100)}
 
 
 

@@ -84,6 +84,7 @@ class DesktopGameManager extends GameManager{
     this.sketch.remove()
     this.endScene.style.display = "none"
     this.container.style.display = "none"
+    this.pageManager.DesktopGameManager = null
   }
 
   findBodyMatchingElement(matterBody, remove = false){
@@ -135,12 +136,16 @@ class DesktopGameManager extends GameManager{
         score: finalScore 
       })
     }
+    console.log(configurationObject)
     async function send(context) {
       try{
       let res = await fetch(context.pageManager.appURL + `/leaderboard`, configurationObject)
+      console.log(res)
       context.pageManager.checkRes(res)
       let json = await res.json()
+      console.log(json)
       let returnedCurrentScore = json.data
+      console.log(returnedCurrentScore)
       context.pageManager.leaderboardManager.updateCurrentScore(returnedCurrentScore)
 
       }catch(error){
@@ -155,6 +160,18 @@ class DesktopGameManager extends GameManager{
   // ─── LISTENERS ───────────────────────────────────────────────────────────────────────────
   //
 
+  removeEventListeners(){
+    this.exitGameButton.removeEventListener('click', function(){
+      if(this.endSceneInput.value !== ""){
+        this.sendScoreLeaderboard(this.endSceneInput.value, this.finalScore)
+      } else {
+        this.pageManager.leaderboardManager.hideCurrentScore()
+      }
+      this.destroyAndHideGame()
+      this.pageManager.leaderboardManager.show()
+    })
+  }
+
   initExitButtonListener(){
     this.exitGameButton.addEventListener('click', function(){
       if(this.endSceneInput.value !== ""){
@@ -164,7 +181,7 @@ class DesktopGameManager extends GameManager{
       }
       this.destroyAndHideGame()
       this.pageManager.leaderboardManager.show()
-    }.bind(this))
+    }.bind(this), {once: true})
   }
 
   initWindowResizeListener(){
