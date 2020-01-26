@@ -81,15 +81,13 @@ class MobileGameManager extends GameManager{
     const container = this[`${matterBody.label}Container`]
 
     if(!container){
-      return console.log("There is no container for this element ^^^")
+      return console.log("WARNING: There is no container for this element ^^^")
     }
 
     const foundElement = container.find(element => element.containsMatterBody(matterBody))
     if(foundElement){
       if(remove){foundElement.remove()}
       return foundElement
-    } else {
-      console.log("matterBody not found in matching container")
     }
   }
 
@@ -107,7 +105,7 @@ class MobileGameManager extends GameManager{
     // this.scoreDisplay.style.display = "none"
     // this.endSceneScore.innerText = this.finalScore
     this.endScene.style.display = "block"
-    console.log("game ended")
+    console.log("INFO:Game ended")
   }
 
   //
@@ -119,16 +117,6 @@ class MobileGameManager extends GameManager{
       this.destroyAndHideGame()
     }.bind(this))
   }
-
-  // initWindowResizeListener(){
-  //   window.addEventListener("resize", function(event){
-  //     console.log("resize window active")
-  //     this.currentWindowWidth = window.innerWidth
-  //     this.currentWindowHight = window.innerHeight
-  //     this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
-  //     this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 200}}
-  //   }.bind(this))
-  // }
 
   addGyroscopeListener(element){
     element.addEventListener('deviceorientation', (event,context = this) => {
@@ -163,7 +151,6 @@ class MobileGameManager extends GameManager{
     
   addGryoscopeBroadcaster(element){
     this.pageManager.gryoscropeBroadcasterIntervalID = element.setInterval(()=>{
-      console.log("sensor sent")
       this.pageManager.gameCable.sensorDataRelay({
         action:"gyroscrope_data_push", 
         type:"sensor_data_relay", 

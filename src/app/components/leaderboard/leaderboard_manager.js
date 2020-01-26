@@ -38,7 +38,6 @@ class LeaderboardManager{
 
 
   updateCurrentScore(result){
-    console.log("Updated players current score")
     this.currentPlayerResultContainer.innerHTML = ""
     const html = new DOMParser().parseFromString(this.currentPlayerResultHTMLTemplate(result.id, result.attributes.nickname.nickname, result.attributes.score), "text/html")
     this.currentPlayerResultContainer.appendChild(html.body.querySelector('div'))
@@ -78,7 +77,6 @@ class LeaderboardManager{
       this.pageManager.checkRes(res)
       const json = await res.json()
       this.currentData = json.data
-      console.log('sucessfully received data for leaderboard')
       this.render()
         
     }catch(error){

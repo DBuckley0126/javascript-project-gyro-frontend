@@ -92,17 +92,13 @@ class DesktopGameManager extends GameManager{
 
     if(!container){
       console.log(matterBody.label)
-      return console.log("There is no container for this element ^^^")
+      return console.log("WARNING: There is no container for this element ^^^")
     }
 
     const foundElement = container.find(element => element.containsMatterBody(matterBody))
     if(foundElement){
       if(remove){foundElement.remove()}
       return foundElement
-    } else {
-      console.log(matterBody)
-      console.log("matterBody not found in matching container")
-      console.log(container)
     }
   }
 
@@ -121,7 +117,7 @@ class DesktopGameManager extends GameManager{
     this.scoreDisplay.style.display = "none"
     this.endSceneScore.innerText = this.finalScore
     this.endScene.style.display = "flex"
-    console.log("game ended")
+    console.log("INFO: Game Ended")
   }
 
   sendScoreLeaderboard(nickname, finalScore){
@@ -136,18 +132,14 @@ class DesktopGameManager extends GameManager{
         score: finalScore 
       })
     }
-    console.log(configurationObject)
+
     async function send(context) {
       try{
       let res = await fetch(context.pageManager.appURL + `/leaderboard`, configurationObject)
-      console.log(res)
       context.pageManager.checkRes(res)
       let json = await res.json()
-      console.log(json)
       let returnedCurrentScore = json.data
-      console.log(returnedCurrentScore)
       context.pageManager.leaderboardManager.updateCurrentScore(returnedCurrentScore)
-
       }catch(error){
         context.pageManager.leaderboardManager.hideCurrentScore()
         context.pageManager.failureNotice(error)
@@ -160,17 +152,6 @@ class DesktopGameManager extends GameManager{
   // ─── LISTENERS ───────────────────────────────────────────────────────────────────────────
   //
 
-  removeEventListeners(){
-    this.exitGameButton.removeEventListener('click', function(){
-      if(this.endSceneInput.value !== ""){
-        this.sendScoreLeaderboard(this.endSceneInput.value, this.finalScore)
-      } else {
-        this.pageManager.leaderboardManager.hideCurrentScore()
-      }
-      this.destroyAndHideGame()
-      this.pageManager.leaderboardManager.show()
-    })
-  }
 
   initExitButtonListener(){
     this.exitGameButton.addEventListener('click', function(){
@@ -186,7 +167,6 @@ class DesktopGameManager extends GameManager{
 
   initWindowResizeListener(){
     window.addEventListener("resize", function(event){
-      console.log("resize window active")
       this.currentWindowWidth = window.innerWidth
       this.currentWindowHight = window.innerHeight
       this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)

@@ -64,11 +64,9 @@ class MobilePageManager{
 
   addUserFocusListeners(element, context = this){
     element.addEventListener('focus', function(){
-      console.log("focus")
       context.userActive = true
     });
     element.addEventListener('blur', function(){
-      console.log("unfocus")
       context.userActive = false
     });
   }
@@ -139,7 +137,7 @@ class MobilePageManager{
       case "subscribed":
         switch(data["action"]){
           case "game_join_success":
-            console.log("Join game success")
+            console.log("INFO: Join game success")
             this.joinGameButton.style.display = "none"
             this.joinCodeInput.style.display = "none"
             this.cancelGameButton.style.display = "block"
@@ -151,16 +149,13 @@ class MobilePageManager{
         this.alertNotice({type:"connection_success", statusText: data["body"]["message"]})
         break  
       case "desktop_ping":
-        console.log("Desktop ping received")
         this.lastPingFromDesktop = Date.now()
         break
       case "game_state":
-        console.log("game_state received")
-        console.log(data)
         this.gameStateHandler(data)
         break
       case "cancel_game":
-        console.log("cancel_game received")
+        console.log("INFO: cancel_game received")
         this.cancelGame(data)
       case "unsubscribed":
         let device = null

@@ -165,11 +165,11 @@ class DesktopPageManager{
       case "subscribed":
         switch(data["action"]){
           case "game_join_success":
-            console.log("mobile joined success")
+            console.log("INFO: Mobile joined success")
             this.startGameButton.style.display = "block"
             break
           case "game_create_success":
-            console.log("game create success")
+            console.log("INFO: Game create success")
             this.createGameButton.innerText = "Remake new game"
             this.joinCodeDisplay.style.display = "block"
             this.cancelGameButton.style.display = "block"
@@ -189,8 +189,7 @@ class DesktopPageManager{
         }else{
           device = "desktop"
         }
-        console.log(`${device} has unsubscribed from game channel ${data["channel"]}`)
-        debugger
+        console.log(`INFO: ${device} has unsubscribed from game channel ${data["channel"]}`)
         if(data["mobile"] == true){
           if(this.gameCable){this.gameCable.cancelGame({action:"desktop_canceled_game_from_mobile_unsubscribe", type:"cancel_game", body: {device: "desktop"}})}
         }
@@ -202,7 +201,7 @@ class DesktopPageManager{
   handleSensorDataRelay(data){
     this.lastPingFromMobile = Date.now()
     this.mobileActive = data["body"]["user_active"]
-    if(this.DesktopGameManager){this.DesktopGameManager.sensorData({x: data["body"]["x"], y: data["body"]["y"]})}else{console.log("WARNING: Can not set sensorData as no game inisialised")}
+    if(this.DesktopGameManager){this.DesktopGameManager.sensorData({x: data["body"]["x"], y: data["body"]["y"]})}
   }
 
   cancelGame(data){

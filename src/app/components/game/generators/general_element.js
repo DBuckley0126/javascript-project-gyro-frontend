@@ -35,7 +35,6 @@ class GeneralElement {
       if(this.constraintArray){this.removeAllConstraints()}
       return removedElementsArray[0]
     } else {
-      console.log("removed")
       Composite.remove(this.game.world, this.matterBody)
       return this
     }

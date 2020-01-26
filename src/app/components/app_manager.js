@@ -21,16 +21,12 @@ class AppManager{
   // Listeners
   addBeginButtonListener(element, context = this){
     this.beginButton.addEventListener('click', function(event){
-      console.log("Begin application")
+      console.log("INFO: Begin application")
       async function beginSequence(){
         try{
           context.beginButton.style.display = "none"
           await context.openFullscreen(context.container)
-          console.log("Fullscreen granted")
-          if(context.deviceType === "mobile"){
-            await screen.orientation.lock("portrait-primary")
-            console.log("Mobile screen orientation locked")
-          } 
+          console.log("INFO: Fullscreen granted")
           
           if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent)){
             context.pageManager = new MobilePageManager(context.container)
@@ -39,6 +35,10 @@ class AppManager{
             context.pageManager = new DesktopPageManager(context.container)
             context.deviceType = "desktop"
           }
+          if(context.deviceType === "mobile"){
+            await screen.orientation.lock("portrait-primary")
+            console.log("INFO: Mobile screen orientation locked")
+          } 
         }catch(error){
           context.beginButton.style.display = "block"
           context.failureNotice(error)
