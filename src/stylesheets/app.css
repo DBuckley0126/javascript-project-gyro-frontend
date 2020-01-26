@@ -1,6 +1,11 @@
 @import url("https://fonts.googleapis.com/css?family=ZCOOL+QingKe+HuangYou&display=swap");
 #app-container #desktop-container {
   display: none;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 #app-container #desktop-container #mobile-connected-alert {
   display: none;
@@ -17,33 +22,60 @@
 #app-container #desktop-container #desktop-game-cancel-button {
   display: none;
 }
+
 #app-container #mobile-container {
+  background-color: white;
   display: none;
-}
-#app-container #mobile-container #desktop-disconnected-alert {
-  display: none;
-}
-#app-container #mobile-container #mobile-game-cancel-button {
-  display: none;
-}
-#app-container #mobile-container #mobile-game-waiting-alert {
-  display: none;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
 #app-container #mobile-game-container {
+  display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container {
+  display: flex;
+  background-color: dimgrey;
+  justify-content: center;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 50px;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container #mobile-game-cancel-button {
+  display: none;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container #mobile-game-waiting-alert {
+  display: none;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container #desktop-disconnected-alert {
   display: none;
 }
 
 #app-container #desktop-game-container {
   display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
 }
 #app-container #desktop-game-container #desktop-game-mobile-connection-warning {
   display: none;
-  position: relative;
-  top: 50vh;
-  left: 50vw;
-  width: 300px;
-  height: 100px;
+  position: absolute;
+  top: 35vh;
+  left: 35vw;
+  width: 30vw;
+  height: 30vh;
   border-radius: 10px;
   border-color: #272727;
   background: #686868;
@@ -54,11 +86,11 @@
 }
 #app-container #desktop-game-container #desktop-game-mobile-active-warning {
   display: none;
-  position: relative;
-  top: 50vh;
-  left: 50vw;
-  width: 300px;
-  height: 100px;
+  position: absolute;
+  top: 35vh;
+  left: 35vw;
+  width: 30vw;
+  height: 30vh;
   border-radius: 10px;
   border-color: #272727;
   background: #686868;
@@ -68,33 +100,39 @@
   color: black;
 }
 #app-container #desktop-game-container #desktop-game-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
 }
 #app-container #desktop-game-container #desktop-matter-developer-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
 }
 #app-container #desktop-game-container #desktop-game-score-display {
   display: none;
-  position: relative;
-  top: 86vh;
-  left: 50vw;
-  width: 100px;
-  height: 50px;
+  position: absolute;
+  bottom: 5vh;
+  left: 45vw;
+  width: 10vw;
+  height: 5vh;
   font-size: 60px;
   font-family: "ZCOOL QingKe HuangYou", cursive;
   color: silver;
 }
 #app-container #desktop-game-container #desktop-game-end-scene {
   display: none;
-  position: relative;
-  top: 50vh;
-  left: 50vw;
-  width: 300px;
-  height: 100px;
+  position: absolute;
+  flex-direction: column;
+  justify-content: center;
+  top: 40vh;
+  left: 25vw;
+  width: 50vw;
+  height: 20vh;
   border-radius: 10px;
   border-color: #272727;
   background: #686868;
@@ -106,13 +144,80 @@
 #app-container #desktop-game-container #desktop-game-end-scene p {
   font-size: 60px;
   font-size: 30px;
+  text-align: center;
   height: 30px;
-  padding-left: 10vw;
+  padding: 0.1vw;
   margin: 0;
+}
+#app-container #desktop-game-container #desktop-game-end-scene #desktop-game-end-scene-exit-button {
+  padding: 0.2vw;
+  width: 10vw;
+}
+#app-container #desktop-game-container #desktop-game-end-scene #desktop-game-end-scene-input {
+  padding: 0.2vw;
+  width: 25vw;
+}
+
+#app-container #desktop-leaderboard-container {
+  display: block;
+  font-size: 60px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  text-align: center;
+  margin: 50px;
+}
+#app-container #desktop-leaderboard-container #current-player-result {
+  display: none;
+}
+#app-container #desktop-leaderboard-container #current-player-result text {
+  font-size: 60px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  text-align: center;
+  margin: 50px;
+}
+#app-container #desktop-leaderboard-container #current-player-result #leaderboard-entry-current-result {
+  background-color: #e79d9d;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-width: 2px;
+  border-color: dimgrey;
+  border-radius: 2px;
+  height: 100px;
+}
+#app-container #desktop-leaderboard-container #current-player-result #leaderboard-entry-current-result text {
+  font-size: 40px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  text-align: center;
+  margin: 50px;
+}
+#app-container #desktop-leaderboard-container #results-container .leaderboard-entry {
+  background-color: #bdbdbd;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-width: 2px;
+  border-color: dimgrey;
+  border-radius: 2px;
+  height: 100px;
+}
+#app-container #desktop-leaderboard-container #results-container .leaderboard-entry text {
+  font-size: 40px;
+  font-family: "ZCOOL QingKe HuangYou", cursive;
+  text-align: center;
+  margin: 50px;
 }
 
 #app-container {
   background-color: white;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#app-container #app-begin-button {
+  width: 20vw;
+  height: 10vh;
 }
 
 /*# sourceMappingURL=app.css.map */

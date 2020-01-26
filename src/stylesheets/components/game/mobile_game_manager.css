@@ -1,5 +1,29 @@
 #app-container #mobile-game-container {
   display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container {
+  display: flex;
+  background-color: dimgrey;
+  justify-content: center;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 50px;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container #mobile-game-cancel-button {
+  display: none;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container #mobile-game-waiting-alert {
+  display: none;
+}
+#app-container #mobile-game-container #mobile-game-overlay-container #desktop-disconnected-alert {
+  display: none;
 }
 
 /*# sourceMappingURL=mobile_game_manager.css.map */

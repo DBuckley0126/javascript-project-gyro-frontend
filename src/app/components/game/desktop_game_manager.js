@@ -79,29 +79,6 @@ class DesktopGameManager extends GameManager{
     this.sketch.loop()
   }
 
-  //
-  // ─── LISTENERS ───────────────────────────────────────────────────────────────────────────
-  //
-
-  initExitButtonListener(){
-    this.exitGameButton.addEventListener('click', function(){
-      if(this.endSceneInput.value !== ""){
-        this.sendScoreLeaderboard(this.endSceneInput.value, this.finalScore)
-      }
-      this.destroyAndHideGame()
-    }.bind(this))
-  }
-
-  initWindowResizeListener(){
-    window.addEventListener("resize", function(event){
-      console.log("resize window active")
-      this.currentWindowWidth = window.innerWidth
-      this.currentWindowHight = window.innerHeight
-      this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
-      this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 200}}
-    }.bind(this))
-  }
-
   destroyAndHideGame(){
     Engine.clear(this.engine)
     this.sketch.remove()
@@ -142,7 +119,7 @@ class DesktopGameManager extends GameManager{
     this.finalScore = this.overallScore
     this.scoreDisplay.style.display = "none"
     this.endSceneScore.innerText = this.finalScore
-    this.endScene.style.display = "block"
+    this.endScene.style.display = "flex"
     console.log("game ended")
   }
 
@@ -158,20 +135,48 @@ class DesktopGameManager extends GameManager{
         score: finalScore 
       })
     }
-    async function send() {
+    async function send(context) {
       try{
-      let res = await fetch(this.pageManager.appURL + `/leaderboard`, configurationObject)
-      this.pageManager.checkRes(res)
+      let res = await fetch(context.pageManager.appURL + `/leaderboard`, configurationObject)
+      context.pageManager.checkRes(res)
       let json = await res.json()
-      let returnedLeaderboardResults = json.data
-      this.pageManager.updateLeaderboard(returnedLeaderboardResults)
+      let returnedCurrentScore = json.data
+      context.pageManager.leaderboardManager.updateCurrentScore(returnedCurrentScore)
 
       }catch(error){
-        this.pageManager.failureNotice(error)
+        context.pageManager.leaderboardManager.hideCurrentScore()
+        context.pageManager.failureNotice(error)
       }
     }
-    send()
+    send(this)
   }
+
+  //
+  // ─── LISTENERS ───────────────────────────────────────────────────────────────────────────
+  //
+
+  initExitButtonListener(){
+    this.exitGameButton.addEventListener('click', function(){
+      if(this.endSceneInput.value !== ""){
+        this.sendScoreLeaderboard(this.endSceneInput.value, this.finalScore)
+      } else {
+        this.pageManager.leaderboardManager.hideCurrentScore()
+      }
+      this.destroyAndHideGame()
+      this.pageManager.leaderboardManager.show()
+    }.bind(this))
+  }
+
+  initWindowResizeListener(){
+    window.addEventListener("resize", function(event){
+      console.log("resize window active")
+      this.currentWindowWidth = window.innerWidth
+      this.currentWindowHight = window.innerHeight
+      this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
+      this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 200}}
+    }.bind(this))
+  }
+
 
   //
   // ─── MATTER + P5 ───────────────────────────────────────────────────────────────────────────

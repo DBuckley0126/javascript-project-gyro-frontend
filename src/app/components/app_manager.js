@@ -5,47 +5,46 @@ class AppManager{
   constructor(container){
     this.container = container
     this.initBindingsAndEventListeners()
-
-    
-    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent)){
-      this.PageManager = new MobilePageManager(container)
-      this.deviceType = "mobile"
-    } else {
-      this.PageManager = new DesktopPageManager(container)
-      this.deviceType = "desktop"
-    }
-
   }
 
   initBindingsAndEventListeners(){
     // Set AppManagers attributes to HTML elements
-    this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
     this.alert = this.container.querySelector("#app-alert")
+    this.beginButton = this.container.querySelector('#app-begin-button')
 
     // Initialise listeners
-    this.addFullscreenRequestButtonListener()
+    this.addBeginButtonListener(this.beginButton)
 
     return Promise.resolve("Finished setting bindings and listeners")
   }
 
   // Listeners
-  addFullscreenRequestButtonListener(context = this){
-    this.fullscreenReqestButton.addEventListener('click', function(event){
-      console.log("Fullscreen button pressed")
-      async function fullScreenLock(){
+  addBeginButtonListener(element, context = this){
+    this.beginButton.addEventListener('click', function(event){
+      console.log("Begin application")
+      async function beginSequence(){
         try{
+          context.beginButton.style.display = "none"
           await context.openFullscreen(context.container)
           console.log("Fullscreen granted")
           if(context.deviceType === "mobile"){
             await screen.orientation.lock("portrait-primary")
             console.log("Mobile screen orientation locked")
           } 
-
+          
+          if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent)){
+            context.pageManager = new MobilePageManager(context.container)
+            context.deviceType = "mobile"
+          } else {
+            context.pageManager = new DesktopPageManager(context.container)
+            context.deviceType = "desktop"
+          }
         }catch(error){
+          context.beginButton.style.display = "block"
           context.failureNotice(error)
         }
       }
-      fullScreenLock()
+      beginSequence()
     })
   }  
 

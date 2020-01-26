@@ -62,7 +62,7 @@ class MobileGameManager extends GameManager{
     this.exitGameButton = this.container.querySelector("#mobile-game-end-scene-exit-button")
     
     // Initialise listeners
-    this.initWindowResizeListener()
+    // this.initWindowResizeListener()
     this.initExitButtonListener()
     this.addGyroscopeListener(window)
     this.addGryoscopeBroadcaster(window)
@@ -120,15 +120,15 @@ class MobileGameManager extends GameManager{
     }.bind(this))
   }
 
-  initWindowResizeListener(){
-    window.addEventListener("resize", function(event){
-      console.log("resize window active")
-      this.currentWindowWidth = window.innerWidth
-      this.currentWindowHight = window.innerHeight
-      this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
-      this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 200}}
-    }.bind(this))
-  }
+  // initWindowResizeListener(){
+  //   window.addEventListener("resize", function(event){
+  //     console.log("resize window active")
+  //     this.currentWindowWidth = window.innerWidth
+  //     this.currentWindowHight = window.innerHeight
+  //     this.sketch.resizeCanvas(this.currentWindowWidth, this.currentWindowHight)
+  //     this.world.bounds = {min:{x: -200 ,y: -400}, max: {x: this.currentWindowWidth + 200, y: this.currentWindowHight + 200}}
+  //   }.bind(this))
+  // }
 
   addGyroscopeListener(element){
     element.addEventListener('deviceorientation', (event,context = this) => {
@@ -212,8 +212,8 @@ class MobileGameManager extends GameManager{
       this.engine = Engine.create({constraintIterations: 2})
       this.world = this.engine.world
       this.world.gravity.y = 0
-      this.world.bounds = {min:{x: -100 ,y: -100}, max: {x: this.currentWindowWidth + 100, y: this.currentWindowHight + 100}}
-      this.spaceship = new SpaceshipElement(this.currentWindowWidth / 2, this.currentWindowHight - 110, 0.5, this)
+      this.world.bounds = {min:{x: -100 ,y: -100}, max: {x: window.innerWidth + 100, y: window.innerHeight + 100}}
+      this.spaceship = new SpaceshipElement(window.innerWidth / 2, window.innerHeight - 110, 0.5, this)
       this.lastTimeGunFired = 0
       // this.scoreDisplay.style.display = "block"
 
@@ -269,7 +269,7 @@ class MobileGameManager extends GameManager{
   reactToMovementControl(){
     const axisMovementPercentage = this._axisX / 180
 
-    const xTargetPositionInWindow = this.currentWindowWidth * axisMovementPercentage
+    const xTargetPositionInWindow = window.innerWidth * axisMovementPercentage
     let moveX = this.spaceship.matterBody.position.x
     if(xTargetPositionInWindow < this.spaceship.matterBody.position.x - 10){
       moveX = this.spaceship.matterBody.position.x - 10

@@ -1,5 +1,5 @@
 import {CableAdapter} from '../../modules'
-import {DesktopGameManager} from '../../modules'
+import {DesktopGameManager, LeaderboardManager} from '../../modules'
 
 class DesktopPageManager{
 
@@ -7,16 +7,17 @@ class DesktopPageManager{
 
   constructor(container){
     this.container = container.querySelector("#desktop-container")
-    this.initConnection()
-    this.renderIndex()
-    this.lastPingFromMobile = null
-    this.mobileConnected = false
-    this.mobileActive = false
     if(window.location.hostname == "localhost"){
       this.appURL = `http://localhost:3000/`
     } else {
       this.appURL = `https://javascript-project-gyro-back.herokuapp.com/`
     }
+    this.initConnection()
+    this.renderIndex()
+    this.lastPingFromMobile = null
+    this.mobileConnected = false
+    this.mobileActive = false
+    this.leaderboardManager = new LeaderboardManager(this, this.container)
   }
 
   // Helper to check response of fetch request
@@ -67,7 +68,7 @@ class DesktopPageManager{
   // Listeners
   addCreateGameListener(element){
     element.addEventListener("click", event => {
-      if(this.gameCable){this.gameCable.unsubscribed({action:"desktop_unsubscribe_check", type:"unsubscribed", body: {device: "desktop"}})}
+      if(this.gameCable){this.gameCable.cancelGame({action:"desktop_remake_game", type:"cancel_game", body: {device: "desktop"}})}
       this.joinCodeDisplay.style.display = "none"
       this.cancelGameButton.style.display = "none"
       let joinCode = Math.floor(10000 + (90000 - 10000) * Math.random());
@@ -82,6 +83,7 @@ class DesktopPageManager{
       if(this.mobileActive){
         // Start game instance
         this.gameCable.gameState({action:"start_game", type:"game_state", body: {action: "start_game"}})
+        this.leaderboardManager.hide()
         this.DesktopGameManager = new DesktopGameManager(this)
         this.startGameButton.innerText = "Play again"
         
@@ -137,9 +139,9 @@ class DesktopPageManager{
       },
       rejected: function(data){
         let error = {type:"connection_rejected", statusText: `Failed to create game for join code ${joinCode}`}
-        clearInterval(this.desktopPingIntervalID)
-        clearInterval(this.obileConnectionObserverIntervalID)
-        this.joinCodeDisplay.style.display = "none"
+        clearInterval(context.desktopPingIntervalID)
+        clearInterval(context.obileConnectionObserverIntervalID)
+        context.joinCodeDisplay.style.display = "none"
         context.failureNotice(error)
       },
       cancelGame: function(payload){
@@ -187,6 +189,7 @@ class DesktopPageManager{
           device = "desktop"
         }
         console.log(`${device} has unsubscribed from game channel ${data["channel"]}`)
+        debugger
         if(data["mobile"] == true){
           if(this.gameCable){this.gameCable.cancelGame({action:"desktop_canceled_game_from_mobile_unsubscribe", type:"cancel_game", body: {device: "desktop"}})}
         }
@@ -198,7 +201,6 @@ class DesktopPageManager{
   handleSensorDataRelay(data){
     this.lastPingFromMobile = Date.now()
     this.mobileActive = data["body"]["user_active"]
-    console.log(data["body"])
     if(this.DesktopGameManager){this.DesktopGameManager.sensorData({x: data["body"]["x"], y: data["body"]["y"]})}else{console.log("WARNING: Can not set sensorData as no game inisialised")}
   }
 
@@ -283,6 +285,8 @@ class DesktopPageManager{
       }
     }, 500)
   }
+
+
 }
 
 export {DesktopPageManager}

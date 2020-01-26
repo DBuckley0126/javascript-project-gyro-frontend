@@ -41,6 +41,8 @@ class MobilePageManager{
     this.fullscreenReqestButton = this.container.querySelector(".fullscreen-request-button")
     this.cancelGameButton = this.container.querySelector("#mobile-game-cancel-button")
     this.waitingAlert = this.container.querySelector("#mobile-game-waiting-alert")
+    this.setupContainer = this.container.querySelector('#mobile-setup-container')
+    this.gameOverlay = this.container.querySelector('#mobile-game-overlay-container')
 
     // Initialise listeners
     this.addJoinGameListener(this.joinGameButton)
@@ -160,18 +162,18 @@ class MobilePageManager{
       case "cancel_game":
         console.log("cancel_game received")
         this.cancelGame(data)
-        case "unsubscribed":
-          let device = null
-          if(data["mobile"]){
-            device = "Mobile"
-          }else{
-            device = "desktop"
-          }
-          console.log(`${device} has unsubscribed from game channel ${data["channel"]}`)
-          if(data["mobile"] == false){
-            if(this.gameCable){this.gameCable.cancelGame({action:"mobile_canceled_game_from_desktop_unsubscribe", type:"cancel_game", body: {device: "mobile"}})}
-          }
-          break          
+      case "unsubscribed":
+        let device = null
+        if(data["mobile"]){
+          device = "Mobile"
+        }else{
+          device = "desktop"
+        }
+        console.log(`${device} has unsubscribed from game channel ${data["channel"]}`)
+        if(data["mobile"] == false){
+          if(this.gameCable){this.gameCable.cancelGame({action:"mobile_canceled_game_from_desktop_unsubscribe", type:"cancel_game", body: {device: "mobile"}})}
+        }
+        break          
     }
   }
 
@@ -183,7 +185,7 @@ class MobilePageManager{
     switch(data["body"]["action"]){
       case "start_game":
       
-      // this.waitingAlert.style.display = "none"
+      this.waitingAlert.style.display = "none"
       break
     }
   }
@@ -199,6 +201,7 @@ class MobilePageManager{
     this.MobileGameManager.destroyAndHideGame()
     clearInterval(this.desktopConnectionObserverIntervalID)
     clearInterval(this.gryoscropeBroadcasterIntervalID)
+    this.desktopDisconnectAlert.style.display = "none"
     this.waitingAlert.style.display = "none"
     this.joinGameButton.style.display = "block"
     this.joinCodeInput.value = ""

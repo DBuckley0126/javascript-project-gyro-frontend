@@ -2,6 +2,11 @@
 
   #desktop-container{
     display:none;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0px;
+    left: 0px;
   
     #mobile-connected-alert{
       display:none;

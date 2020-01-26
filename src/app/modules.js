@@ -10,6 +10,7 @@ export {AppManager} from './components/app_manager'
 export {GameManager} from './components/game/game_manager'
 export {DesktopGameManager} from './components/game/desktop_game_manager'
 export {MobileGameManager} from './components/game/mobile_game_manager'
+export {LeaderboardManager} from './components/leaderboard/leaderboard_manager'
 
 
 // GENERATORS

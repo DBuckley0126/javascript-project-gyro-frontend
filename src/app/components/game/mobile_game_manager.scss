@@ -2,6 +2,34 @@
 
   #mobile-game-container{
     display: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+
+    #mobile-game-overlay-container{
+      display: flex;
+      background-color: dimgrey;
+      justify-content: center;
+      position: absolute;
+      bottom: 0px;
+      left: 0px;
+      width: 100vw;
+      height: 50px;
+
+      #mobile-game-cancel-button{
+        display: none;
+      }
+  
+      #mobile-game-waiting-alert{
+        display: none;
+      }
+
+      #desktop-disconnected-alert{
+        display: none;
+      }
+    }
   }
 
 }

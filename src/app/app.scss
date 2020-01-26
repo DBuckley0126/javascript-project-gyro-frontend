@@ -2,12 +2,23 @@
 @use '../app/components/mobile_page/mobile_page';
 @use '../app/components/game/mobile_game_manager.scss';
 @use '../app/components/game/desktop_game_manager.scss';
+@use '../app/components/leaderboard/leaderboard.scss';
 
 
 @import url("https://fonts.googleapis.com/css?family=ZCOOL+QingKe+HuangYou&display=swap");
 
 #app-container {
   background-color: white;
-  
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+
+  #app-begin-button{
+    width: 20vw;
+    height: 10vh;
+
+  }
 
 }

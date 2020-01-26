@@ -3,19 +3,13 @@
   #mobile-container{
     background-color: white;
     display:none;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 
-    #desktop-disconnected-alert{
-      display: none;
-    }
 
-    #mobile-game-cancel-button{
-      display: none;
-    }
-
-    #mobile-game-waiting-alert{
-      display: none;
-    }
-    
   }
 
 }
