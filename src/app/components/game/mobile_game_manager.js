@@ -105,7 +105,7 @@ class MobileGameManager extends GameManager{
     // this.scoreDisplay.style.display = "none"
     // this.endSceneScore.innerText = this.finalScore
     this.endScene.style.display = "block"
-    console.log("INFO:Game ended")
+    console.log("INFO: Game ended")
   }
 
   //
