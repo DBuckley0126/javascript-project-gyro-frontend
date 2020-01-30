@@ -9,6 +9,7 @@ class LeaderboardManager{
     this.currentPlayerResultContainer = this.container.querySelector('#current-player-result')
     this.resultsContainer = this.container.querySelector('#results-container')
     this.updateButton = this.container.querySelector('#leaderboard-update-button')
+    this.showEntry = this.container.querySelector('#show-entry')
     this.fetchAndLoadAllData()
     this.addUpdateLeaderboardListener(this.updateButton)
     
@@ -70,6 +71,26 @@ class LeaderboardManager{
     send(this)
   }
 
+  showLeaderboardEntry(entry_id){
+
+    async function send(context) {
+ 
+      let res = await fetch(context.pageManager.appURL + `/leaderboard/${entry_id}`)
+      context.pageManager.checkRes(res)
+      let json = await res.json()
+      let returnedEntry = json.data
+      context.displayEntry(returnedEntry)
+
+    }
+
+    send(this)
+  }
+
+  displayEntry(returnedEntry){
+    this.showEntry.innerText =  `Nickname: ${returnedEntry.attributes.nickname} Highest Score: ${returnedEntry.attributes.highest_score.score}`
+    this.showEntry.style.display = "block"
+  }
+
   
   async fetchAndLoadAllData() {
     try{
@@ -89,6 +110,9 @@ class LeaderboardManager{
     const context = this
     for(const result of this.currentData){
       const html = new DOMParser().parseFromString(context.leaderboardEntryHTMLTemplate(result.id, result.attributes.nickname.nickname, result.attributes.score, result.attributes.date), "text/html")
+      html.body.querySelector('div').addEventListener('click', (event)=>{
+        this.showLeaderboardEntry(event.target.dataset.id)
+      })
       context.resultsContainer.appendChild(html.body.querySelector('div'))
     }
   }

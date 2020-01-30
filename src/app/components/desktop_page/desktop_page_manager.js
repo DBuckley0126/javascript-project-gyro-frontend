@@ -65,7 +65,11 @@ class DesktopPageManager{
     return Promise.resolve("Finished setting bindings and listeners")
   }
 
-  // Listeners
+
+  //
+  // ─── LISTENERS ───────────────────────────────────────────────────────────────────────────
+  //
+
   addCreateGameListener(element){
     element.addEventListener("click", event => {
       if(this.gameCable){this.gameCable.cancelGame({action:"desktop_remake_game", type:"cancel_game", body: {device: "desktop"}})}
@@ -102,8 +106,10 @@ class DesktopPageManager{
     })
   }
 
-
-  // Create cable connection for consumer(Unique user)
+  //
+  // ─── CABLE CONNECTION ───────────────────────────────────────────────────────────────────────────
+  //
+    
   async initConnection(){
     try{
       await this.attachAdapter() 
@@ -123,7 +129,10 @@ class DesktopPageManager{
   }
   
 
-  // Create subscription from DesktopPageManager's cable using joinCode
+  //
+  // ─── CABLE SUBSCRIPTION ───────────────────────────────────────────────────────────────────────────
+  //
+   
   initGameSubscription(joinCode, context = this){
     this.gameCable = this.adapter.cable.subscriptions.create({channel: "GameChannel", join_code: joinCode, mobile: false}, {
       received: function(data){
@@ -156,6 +165,7 @@ class DesktopPageManager{
   }
 
   // Data handler(switch) for data received from subscription
+ 
   cableDataHandler(data){
     switch(data["type"]){
       case "sensor_data_relay":

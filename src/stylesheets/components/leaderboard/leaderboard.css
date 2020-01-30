@@ -46,5 +46,8 @@
   text-align: center;
   margin: 50px;
 }
+#app-container #desktop-leaderboard-container #show-entry {
+  display: none;
+}
 
 /*# sourceMappingURL=leaderboard.css.map */
